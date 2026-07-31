@@ -11,8 +11,8 @@
  * 1. Projekte direkt im Google Sheet pflegen (aktuelle Tabelle: siehe Team).
  *    Spalten (erste Zeile, Reihenfolge egal, Groß-/Kleinschreibung egal):
  *
- *      ID | Projektname | Ort | Land | Latitude | Longitude | Courts |
- *      Court-Typ | Fertigstellungsjahr | Beschreibung | Bild-URL |
+ *      ID | Projektname | Ort | Land | Latitude | Longitude | Google-Maps-Link |
+ *      Courts | Court-Typ | Fertigstellungsjahr | Beschreibung | Bild-URL |
  *      Blog-URL | Marke | Marken-Logo-URL
  *
  *    - "ID" optional — fehlt sie, wird automatisch eine aus Projektname + Ort
@@ -20,9 +20,19 @@
  *    - "Bild-URL", "Marken-Logo-URL", "Blog-URL": vollständige, öffentlich
  *      erreichbare Links. Leer lassen, wenn nicht vorhanden.
  *    - "Marke": z. B. "adidas" oder "redsport" (Freitext).
+ *    - "Court-Typ": Mehrere Werte durch Komma oder Semikolon trennen, z. B.
+ *      "High Competition, AFP, Single" — werden auf der Website automatisch
+ *      als einzelne Tags angezeigt (statt als ein zusammengeschriebener Text).
  *    - Latitude/Longitude: Punkt oder Komma als Dezimaltrennzeichen — beides
  *      wird automatisch erkannt (Google Sheets exportiert je nach
  *      Spracheinstellung mit Komma, z. B. "51,1657").
+ *    - Alternative zu Latitude/Longitude: Spalte "Google-Maps-Link" mit der
+ *      VOLLEN Google-Maps-URL (aus der Adressleiste kopiert, enthält
+ *      "@51.1657,10.4515,17z" o. Ä.) — Koordinaten werden daraus automatisch
+ *      gelesen. Funktioniert NICHT mit gekürzten "Teilen"-Links
+ *      (maps.app.goo.gl/...), da dort keine Koordinaten in der URL stehen.
+ *      Sind sowohl Latitude/Longitude als auch ein Maps-Link ausgefüllt,
+ *      haben die manuellen Latitude/Longitude-Werte Vorrang.
  *
  * 2. Änderungen im Sheet sind sofort live — die Website lädt die Tabelle bei
  *    jedem Seitenaufruf neu über den CSV-Export-Link unten. Kein Export, kein

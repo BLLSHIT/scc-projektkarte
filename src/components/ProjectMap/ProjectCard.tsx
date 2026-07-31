@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { Project } from "../../data/projects";
 import { BrandBadge } from "../BrandBadge/BrandBadge";
+import { splitTags } from "../../utils/splitTags";
 import styles from "./ProjectCard.module.css";
 
 type Point = { x: number; y: number };
@@ -71,7 +72,7 @@ export function ProjectCard({
 
   const facts = [
     project.courts != null ? `${project.courts} Court${project.courts === 1 ? "" : "s"}` : null,
-    project.courtType,
+    ...splitTags(project.courtType),
     project.completionYear != null ? String(project.completionYear) : null,
   ].filter((f): f is string => Boolean(f));
 

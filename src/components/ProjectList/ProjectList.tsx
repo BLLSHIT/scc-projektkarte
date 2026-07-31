@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useProjects } from "../../data/useProjects";
 import { BrandBadge } from "../BrandBadge/BrandBadge";
+import { splitTags } from "../../utils/splitTags";
 import styles from "./ProjectList.module.css";
 
 const ALL = "__all__";
@@ -12,7 +13,7 @@ export function ProjectList() {
   const [courtBrand, setCourtBrand] = useState(ALL);
 
   const courtTypes = useMemo(
-    () => Array.from(new Set(projects.map((p) => p.courtType).filter(Boolean))) as string[],
+    () => Array.from(new Set(projects.flatMap((p) => splitTags(p.courtType)))),
     [projects],
   );
   const courtBrands = useMemo(
@@ -23,7 +24,7 @@ export function ProjectList() {
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     return projects.filter((project) => {
-      if (courtType !== ALL && project.courtType !== courtType) return false;
+      if (courtType !== ALL && !splitTags(project.courtType).includes(courtType)) return false;
       if (courtBrand !== ALL && project.courtBrand !== courtBrand) return false;
       if (query) {
         const haystack = `${project.name} ${project.city} ${project.country}`.toLowerCase();
@@ -101,7 +102,7 @@ export function ProjectList() {
               project.courts != null
                 ? `${project.courts} Court${project.courts === 1 ? "" : "s"}`
                 : null,
-              project.courtType,
+              ...splitTags(project.courtType),
               project.completionYear != null ? String(project.completionYear) : null,
             ].filter((f): f is string => Boolean(f));
 

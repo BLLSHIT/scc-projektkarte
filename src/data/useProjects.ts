@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { PROJECTS_CSV_URL } from "../config/dataSource";
 import { parseCsv } from "./csv";
+import { extractLatLngFromGoogleMapsUrl } from "./googleMapsLink";
 import { projects as fallbackProjects, type Project } from "./projects";
 
 export type ProjectsSource = "csv" | "fallback";
@@ -50,12 +51,32 @@ function toNumber(value: string | undefined): number | undefined {
 function rowToProject(row: Record<string, string>, index: number): Project | null {
   const name = findColumn(row, "Projektname", "Name");
   const city = findColumn(row, "Ort", "Stadt", "City");
-  const latitude = toNumber(findColumn(row, "Latitude", "Lat", "Breitengrad"));
-  const longitude = toNumber(findColumn(row, "Longitude", "Lng", "Lon", "Längengrad"));
+  let latitude = toNumber(findColumn(row, "Latitude", "Lat", "Breitengrad"));
+  let longitude = toNumber(findColumn(row, "Longitude", "Lng", "Lon", "Längengrad"));
+
+  if (latitude == null || longitude == null) {
+    const mapsUrl = findColumn(
+      row,
+      "Google-Maps-Link",
+      "Google Maps Link",
+      "Maps-Link",
+      "Standort-Link",
+      "Google Maps",
+    );
+    const coords = mapsUrl ? extractLatLngFromGoogleMapsUrl(mapsUrl) : null;
+    if (coords) {
+      latitude = coords.latitude;
+      longitude = coords.longitude;
+    } else if (mapsUrl) {
+      console.warn(
+        `[useProjects] Zeile ${index + 2}: Koordinaten konnten nicht aus dem Google-Maps-Link gelesen werden — bitte die volle Adressleisten-URL statt eines "Teilen"-Kurzlinks (maps.app.goo.gl) verwenden.`,
+      );
+    }
+  }
 
   if (!name || !city || latitude == null || longitude == null) {
     console.warn(
-      `[useProjects] Zeile ${index + 2} übersprungen — Projektname, Ort, Latitude und Longitude sind Pflichtfelder.`,
+      `[useProjects] Zeile ${index + 2} übersprungen — Projektname, Ort sowie Latitude/Longitude oder ein gültiger Google-Maps-Link sind Pflichtfelder.`,
     );
     return null;
   }
@@ -122,7 +143,7 @@ export function useProjects(): ProjectsState {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);
         console.warn(
-          `[useProjects] SharePoint-CSV konnte nicht geladen werden (${message}) — verwende Platzhalterdaten.`,
+          `[useProjects] Projekt-CSV konnte nicht geladen werden (${message}) — verwende Platzhalterdaten.`,
         );
         setState({
           projects: fallbackProjects,
