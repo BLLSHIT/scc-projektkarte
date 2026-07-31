@@ -93,6 +93,7 @@ function rowToProject(row: Record<string, string>, index: number): Project | nul
     longitude,
     courts: toNumber(findColumn(row, "Courts", "Anzahl Courts")),
     courtType: findColumn(row, "Court-Typ", "Courttyp", "Court Typ"),
+    indoorOutdoor: findColumn(row, "Indoor/Outdoor", "Indoor-Outdoor", "IndoorOutdoor", "Indoor Outdoor"),
     completionYear: toNumber(findColumn(row, "Fertigstellungsjahr", "Jahr")),
     description: findColumn(row, "Beschreibung", "Description"),
     image: findColumn(row, "Bild-URL", "Bild", "Image"),

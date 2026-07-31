@@ -6,11 +6,12 @@ import styles from "./ProjectList.module.css";
 
 const ALL = "__all__";
 
-export function ProjectList() {
+export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {}) {
   const { projects } = useProjects();
   const [search, setSearch] = useState("");
   const [courtType, setCourtType] = useState(ALL);
   const [courtBrand, setCourtBrand] = useState(ALL);
+  const [indoorOutdoor, setIndoorOutdoor] = useState(ALL);
 
   const courtTypes = useMemo(
     () => Array.from(new Set(projects.flatMap((p) => splitTags(p.courtType)))),
@@ -20,29 +21,41 @@ export function ProjectList() {
     () => Array.from(new Set(projects.map((p) => p.courtBrand).filter(Boolean))) as string[],
     [projects],
   );
+  const indoorOutdoorOptions = useMemo(
+    () => Array.from(new Set(projects.flatMap((p) => splitTags(p.indoorOutdoor)))),
+    [projects],
+  );
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     return projects.filter((project) => {
       if (courtType !== ALL && !splitTags(project.courtType).includes(courtType)) return false;
       if (courtBrand !== ALL && project.courtBrand !== courtBrand) return false;
+      if (indoorOutdoor !== ALL && !splitTags(project.indoorOutdoor).includes(indoorOutdoor)) {
+        return false;
+      }
       if (query) {
         const haystack = `${project.name} ${project.city} ${project.country}`.toLowerCase();
         if (!haystack.includes(query)) return false;
       }
       return true;
     });
-  }, [projects, search, courtType, courtBrand]);
+  }, [projects, search, courtType, courtBrand, indoorOutdoor]);
 
-  const hasActiveFilters = search !== "" || courtType !== ALL || courtBrand !== ALL;
+  const hasActiveFilters =
+    search !== "" || courtType !== ALL || courtBrand !== ALL || indoorOutdoor !== ALL;
   const resetFilters = () => {
     setSearch("");
     setCourtType(ALL);
     setCourtBrand(ALL);
+    setIndoorOutdoor(ALL);
   };
 
   return (
-    <section className={styles.section} aria-label="Projektliste mit Filter">
+    <section
+      className={`${styles.section} ${fullWidth ? styles.sectionFullWidth : ""}`}
+      aria-label="Projektliste mit Filter"
+    >
       <div className={styles.filters}>
         <input
           type="search"
@@ -82,6 +95,21 @@ export function ProjectList() {
             ))}
           </select>
         ) : null}
+        {indoorOutdoorOptions.length > 0 ? (
+          <select
+            className={styles.select}
+            value={indoorOutdoor}
+            onChange={(event) => setIndoorOutdoor(event.target.value)}
+            aria-label="Nach Indoor/Outdoor filtern"
+          >
+            <option value={ALL}>Indoor/Outdoor</option>
+            {indoorOutdoorOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        ) : null}
         {hasActiveFilters ? (
           <button type="button" className={styles.resetButton} onClick={resetFilters}>
             Filter zurücksetzen
@@ -103,6 +131,7 @@ export function ProjectList() {
                 ? `${project.courts} Court${project.courts === 1 ? "" : "s"}`
                 : null,
               ...splitTags(project.courtType),
+              ...splitTags(project.indoorOutdoor),
               project.completionYear != null ? String(project.completionYear) : null,
             ].filter((f): f is string => Boolean(f));
 

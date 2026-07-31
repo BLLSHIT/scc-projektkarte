@@ -19,6 +19,12 @@
   transform: translateY(0);
 }
 
+/* Für Embed-Kontexte (iframe): Breite komplett durch den umgebenden
+   Container bestimmen lassen, statt auf 960px zu deckeln. */
+.mapWrapperFullWidth {
+  max-width: none;
+}
+
 .mapWrapper :global(.leaflet-container) {
   background: #dfe8e2;
   font-family: inherit;

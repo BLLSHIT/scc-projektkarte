@@ -29,6 +29,8 @@ export type Project = {
   longitude: number;
   courts?: number;
   courtType?: string;
+  /** "Indoor", "Outdoor" oder z. B. "Indoor, Outdoor" bei gemischten Anlagen. */
+  indoorOutdoor?: string;
   completionYear?: number;
   description?: string;
   image?: string;

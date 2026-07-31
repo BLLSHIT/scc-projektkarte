@@ -12,17 +12,19 @@
  *    Spalten (erste Zeile, Reihenfolge egal, Groß-/Kleinschreibung egal):
  *
  *      ID | Projektname | Ort | Land | Latitude | Longitude | Google-Maps-Link |
- *      Courts | Court-Typ | Fertigstellungsjahr | Beschreibung | Bild-URL |
- *      Blog-URL | Marke | Marken-Logo-URL
+ *      Courts | Court-Typ | Indoor/Outdoor | Fertigstellungsjahr | Beschreibung |
+ *      Bild-URL | Blog-URL | Marke | Marken-Logo-URL
  *
  *    - "ID" optional — fehlt sie, wird automatisch eine aus Projektname + Ort
  *      erzeugt.
  *    - "Bild-URL", "Marken-Logo-URL", "Blog-URL": vollständige, öffentlich
  *      erreichbare Links. Leer lassen, wenn nicht vorhanden.
  *    - "Marke": z. B. "adidas" oder "redsport" (Freitext).
- *    - "Court-Typ": Mehrere Werte durch Komma oder Semikolon trennen, z. B.
- *      "High Competition, AFP, Single" — werden auf der Website automatisch
- *      als einzelne Tags angezeigt (statt als ein zusammengeschriebener Text).
+ *    - "Court-Typ", "Indoor/Outdoor": Mehrere Werte durch Komma oder Semikolon
+ *      trennen, z. B. "High Competition, AFP, Single" oder "Indoor, Outdoor"
+ *      bei gemischten Anlagen — werden auf der Website automatisch als
+ *      einzelne, filterbare Tags angezeigt (statt als ein zusammengeschriebener
+ *      Text).
  *    - Latitude/Longitude: Punkt oder Komma als Dezimaltrennzeichen — beides
  *      wird automatisch erkannt (Google Sheets exportiert je nach
  *      Spracheinstellung mit Komma, z. B. "51,1657").

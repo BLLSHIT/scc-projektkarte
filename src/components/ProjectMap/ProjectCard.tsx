@@ -73,6 +73,7 @@ export function ProjectCard({
   const facts = [
     project.courts != null ? `${project.courts} Court${project.courts === 1 ? "" : "s"}` : null,
     ...splitTags(project.courtType),
+    ...splitTags(project.indoorOutdoor),
     project.completionYear != null ? String(project.completionYear) : null,
   ].filter((f): f is string => Boolean(f));
 

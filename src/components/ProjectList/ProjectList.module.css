@@ -3,6 +3,10 @@
   margin: 56px auto 0;
 }
 
+.sectionFullWidth {
+  max-width: none;
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;

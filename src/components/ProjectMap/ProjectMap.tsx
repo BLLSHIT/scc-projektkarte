@@ -214,7 +214,7 @@ function MapContent({
   );
 }
 
-export function ProjectMap() {
+export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) {
   const { projects } = useProjects();
   const hoverCapable = useHoverCapable();
   const isMobileViewport = useIsMobileViewport();
@@ -225,7 +225,13 @@ export function ProjectMap() {
   return (
     <div>
       <div
-        className={`${styles.mapWrapper} ${ready ? styles.mapWrapperReady : ""}`}
+        className={[
+          styles.mapWrapper,
+          ready ? styles.mapWrapperReady : "",
+          fullWidth ? styles.mapWrapperFullWidth : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         role="region"
         aria-label="Karte mit SCC-Courts-Projektstandorten"
       >

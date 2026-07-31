@@ -6,7 +6,7 @@ import "./embed.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ProjectMap />
+    <ProjectMap fullWidth />
   </StrictMode>,
 );
 
