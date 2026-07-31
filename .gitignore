@@ -16,6 +16,9 @@ dist-ssr
 # Unrelated Tooling-Artefakt, kein Projekt-Asset
 ruvector.db
 
+# Microsoft-Office-Sperrdateien
+~$*.xlsx
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

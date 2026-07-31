@@ -1,50 +1,47 @@
 /**
- * Anbindung der Projektdaten an eine SharePoint-/Excel-Online-Tabelle per CSV.
+ * Anbindung der Projektdaten per CSV-Datei im Repo (public/data/projects.csv).
  *
- * SO RICHTET IHR DIE EXCEL-DATEI IN SHAREPOINT EIN:
+ * Hintergrund: Der SCC-Courts-Microsoft-365-Tenant blockiert anonyme
+ * "Jeder mit dem Link"-Freigaben auf Organisationsebene — auch ein Link, der
+ * im Teilen-Dialog explizit auf "Jeder mit dem Link" gestellt wurde, verlangt
+ * beim Abruf weiterhin eine Microsoft-Anmeldung. Ein direkter Abruf aus
+ * SharePoint funktioniert daher ohne IT-seitige Tenant-Änderung nicht.
  *
- * 1. Excel-Datei in SharePoint anlegen/pflegen mit genau diesen Spaltennamen
- *    in der ersten Zeile (Reihenfolge egal, Groß-/Kleinschreibung egal):
+ * SO AKTUALISIERT IHR DIE PROJEKTLISTE (ohne SharePoint-Link):
+ *
+ * 1. Excel-Datei wie gewohnt pflegen (Vorlage: SCC_Courts_Projekte_Vorlage.xlsx),
+ *    mit genau diesen Spaltennamen in der ersten Zeile:
  *
  *      ID | Projektname | Ort | Land | Latitude | Longitude | Courts |
  *      Court-Typ | Fertigstellungsjahr | Beschreibung | Bild-URL |
  *      Blog-URL | Marke | Marken-Logo-URL
  *
- *    - "ID" ist optional — fehlt sie, wird automatisch eine aus Projektname
- *      + Ort erzeugt. Bei eigener Vergabe: dauerhaft eindeutig halten.
- *    - "Bild-URL", "Marken-Logo-URL", "Blog-URL": vollständige Links
- *      (z. B. zu Bildern in einer öffentlichen SharePoint-/Teams-Bibliothek,
- *      oder eigener Bilder-Ablage). Leer lassen, wenn nicht vorhanden.
+ *    - "ID" optional — fehlt sie, wird automatisch eine aus Projektname + Ort
+ *      erzeugt.
+ *    - "Bild-URL", "Marken-Logo-URL", "Blog-URL": vollständige, öffentlich
+ *      erreichbare Links. Leer lassen, wenn nicht vorhanden.
  *    - "Marke": z. B. "adidas" oder "redsport" (Freitext).
  *    - Dezimaltrennzeichen bei Latitude/Longitude: Punkt (z. B. 51.1657).
  *
- * 2. Datei > Freigeben > "Jeder mit dem Link kann anzeigen" (oder eine
- *    passendere, von der IT freigegebene Freigabeeinstellung).
+ * 2. In Excel: Datei → Speichern unter/Herunterladen als → CSV (UTF-8).
  *
- * 3. Aus dem Freigabelink einen CSV-Exportlink erzeugen: die Datei in
- *    Excel Online öffnen, dann in der Adressleiste die Web-URL wie folgt
- *    umbauen (Beispiel):
+ * 3. Die exportierte CSV-Datei im GitHub-Repo unter public/data/projects.csv
+ *    ablegen (ersetzt die bestehende Datei). Am einfachsten direkt im Browser:
+ *    https://github.com/BLLSHIT/scc-projektkarte/upload/main/public/data
+ *    → Datei per Drag-and-Drop hochladen → "Commit changes" klicken.
+ *    Kein Login außer dem bestehenden GitHub-Zugang nötig, keine IT-Freigabe.
  *
- *      Normale Datei-URL:
- *      https://firma.sharepoint.com/sites/Team/Freigegebene%20Dokumente/Projekte.xlsx
+ * 4. Die Website lädt public/data/projects.csv automatisch bei jedem
+ *    Seitenaufruf. Ist die Datei leer/ungültig, wird automatisch auf die
+ *    lokalen Platzhalterdaten aus src/data/projects.ts zurückgefallen — die
+ *    Karte bleibt also immer funktionsfähig.
  *
- *      CSV-Exportlink (Tabellenname/Sheet ggf. anpassen):
- *      https://firma.sharepoint.com/sites/Team/_layouts/15/download.aspx?
- *      SourceUrl=/sites/Team/Freigegebene%20Dokumente/Projekte.xlsx
- *
- *    Einfacher: Datei in Excel Online öffnen → Datei → Freigeben →
- *    "Link kopieren" → diesen Link unten als PROJECTS_CSV_URL eintragen.
- *    Falls der direkte Link kein reines CSV liefert, mit der IT eine
- *    Power-Automate-Routine einrichten, die die Tabelle regelmäßig als
- *    CSV in eine öffentlich abrufbare Datei exportiert.
- *
- * 4. Link unten eintragen. Ohne Link (leerer String) nutzt die Website
- *    automatisch die lokalen Platzhalterdaten aus src/data/projects.ts.
- *    Schlägt der Abruf fehl (Netzwerk, Berechtigung, Format), wird ebenfalls
- *    automatisch auf die Platzhalterdaten zurückgefallen — die Karte bleibt
- *    also immer funktionsfähig.
+ * Später doch SharePoint anbinden? Sobald die IT anonyme Freigaben für den
+ * Tenant erlaubt (oder eine App-Registrierung mit Microsoft-Graph-Zugriff
+ * eingerichtet ist), einfach PROJECTS_CSV_URL unten auf den SharePoint-
+ * CSV-Link umstellen — der Rest der Anbindung (Parser, Fallback) bleibt gleich.
  */
-export const PROJECTS_CSV_URL = "";
+export const PROJECTS_CSV_URL = `${import.meta.env.BASE_URL}data/projects.csv`;
 
 /** Wie oft (ms) die CSV-Quelle beim erneuten Laden der Seite als "frisch" gilt. */
 export const PROJECTS_CACHE_MS = 5 * 60 * 1000;

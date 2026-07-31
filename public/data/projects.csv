@@ -1,0 +1,3 @@
+ID,Projektname,Ort,Land,Latitude,Longitude,Courts,Court-Typ,Fertigstellungsjahr,Beschreibung,Bild-URL,Blog-URL,Marke,Marken-Logo-URL
+projekt-beispiel-1,SCC Padel Center Musterstadt,Musterstadt,Deutschland,51.1657,10.4515,2,Padel Court,2026,Kurzbeschreibung des Projekts.,https://.../bild.jpg,https://.../blogartikel,adidas,https://.../adidas-logo.svg
+projekt-beispiel-2,SCC Panorama Court Nordstadt,Nordstadt,Deutschland,53.5511,9.9937,3,Panorama Court,2025,,,,redsport,https://.../redsport-logo.svg
