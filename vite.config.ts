@@ -15,6 +15,8 @@ export default defineConfig({
         // Eigene, schlanke Seite ohne Überschrift/Liste — nur die Karte,
         // gedacht zum Einbetten per iframe (z. B. WordPress/Avada).
         embed: fileURLToPath(new URL("./embed.html", import.meta.url)),
+        // Zweite Embed-Variante: Karte + Projektliste mit Filtern zusammen.
+        embedList: fileURLToPath(new URL("./embed-list.html", import.meta.url)),
       },
     },
   },
