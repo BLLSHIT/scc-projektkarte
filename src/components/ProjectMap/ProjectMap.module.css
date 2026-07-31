@@ -1,0 +1,58 @@
+.mapWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  aspect-ratio: 1376 / 768;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #dfe8e2;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+
+.mapWrapperReady {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mapWrapper :global(.leaflet-container) {
+  background: #dfe8e2;
+  font-family: inherit;
+}
+
+.mapWrapper :global(.leaflet-image-layer) {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Zoom-Steuerung an die Markenfarben angleichen. */
+.mapWrapper :global(.leaflet-control-zoom) {
+  border: none;
+  box-shadow: 0 4px 14px rgba(3, 25, 18, 0.18);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mapWrapper :global(.leaflet-control-zoom a) {
+  background: #fffdfa;
+  color: #036147;
+  border: none;
+}
+
+.mapWrapper :global(.leaflet-control-zoom a:hover) {
+  background: #eaf3ee;
+  color: #024a37;
+}
+
+.mapWrapper :global(.leaflet-control-zoom-in) {
+  border-bottom: 1px solid rgba(3, 97, 71, 0.12) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapWrapper {
+    transition: none;
+  }
+}

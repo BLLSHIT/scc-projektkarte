@@ -1,0 +1,19 @@
+.logo {
+  height: 22px;
+  width: auto;
+  max-width: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.badge {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #5c6b62;
+  border: 1px solid #d8e2dc;
+  border-radius: 999px;
+  padding: 3px 9px;
+}

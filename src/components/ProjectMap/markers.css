@@ -1,0 +1,67 @@
+/*
+ * Globale Styles für die Leaflet-Marker.
+ * Leaflet rendert divIcon-Inhalte über eine HTML-String (nicht über React),
+ * daher können hierfür keine CSS-Module verwendet werden — bewusst global,
+ * auf die Klassen "scc-marker" / "scc-marker__dot" beschränkt.
+ */
+
+.scc-marker {
+  /* Positionierung übernimmt Leaflet per inline transform (translate3d) —
+     hier NICHT animieren/transformieren, sonst überschreibt die Animation
+     die Positionierung. Das Erscheinen animiert stattdessen der innere Dot. */
+  cursor: pointer;
+  outline: none;
+}
+
+.scc-marker__dot {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 4px;
+  border-radius: 50%;
+  background: #036147;
+  border: 2px solid #f6f3ee;
+  box-shadow: 0 1px 4px rgba(3, 25, 18, 0.35);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+  /* "backwards" (ohne forwards): nach Animationsende greifen wieder normale
+     Kaskadenregeln, damit Hover/Fokus-Transform danach ungestört wirkt. */
+  animation: scc-marker-appear 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: var(--scc-marker-delay, 0ms);
+}
+
+.scc-marker:hover .scc-marker__dot,
+.scc-marker:focus-visible .scc-marker__dot,
+.scc-marker--active .scc-marker__dot {
+  transform: scale(1.35);
+  background: #024a37;
+  box-shadow:
+    0 0 0 6px rgba(3, 97, 71, 0.16),
+    0 2px 6px rgba(3, 25, 18, 0.35);
+}
+
+.scc-marker:focus-visible .scc-marker__dot {
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 6px #036147;
+}
+
+@keyframes scc-marker-appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scc-marker__dot {
+    animation: none;
+    transition: none;
+  }
+}
