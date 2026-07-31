@@ -1,16 +1,15 @@
 /**
- * Anbindung der Projektdaten per CSV-Datei im Repo (public/data/projects.csv).
+ * Anbindung der Projektdaten an ein Google Sheet (CSV-Export).
  *
  * Hintergrund: Der SCC-Courts-Microsoft-365-Tenant blockiert anonyme
- * "Jeder mit dem Link"-Freigaben auf Organisationsebene — auch ein Link, der
- * im Teilen-Dialog explizit auf "Jeder mit dem Link" gestellt wurde, verlangt
- * beim Abruf weiterhin eine Microsoft-Anmeldung. Ein direkter Abruf aus
- * SharePoint funktioniert daher ohne IT-seitige Tenant-Änderung nicht.
+ * "Jeder mit dem Link"-Freigaben organisationsweit — SharePoint-Links
+ * verlangen daher immer eine Microsoft-Anmeldung und funktionieren nicht als
+ * Datenquelle. Google Sheets hat diese Einschränkung nicht.
  *
- * SO AKTUALISIERT IHR DIE PROJEKTLISTE (ohne SharePoint-Link):
+ * SO AKTUALISIERT IHR DIE PROJEKTLISTE:
  *
- * 1. Excel-Datei wie gewohnt pflegen (Vorlage: SCC_Courts_Projekte_Vorlage.xlsx),
- *    mit genau diesen Spaltennamen in der ersten Zeile:
+ * 1. Projekte direkt im Google Sheet pflegen (aktuelle Tabelle: siehe Team).
+ *    Spalten (erste Zeile, Reihenfolge egal, Groß-/Kleinschreibung egal):
  *
  *      ID | Projektname | Ort | Land | Latitude | Longitude | Courts |
  *      Court-Typ | Fertigstellungsjahr | Beschreibung | Bild-URL |
@@ -21,27 +20,26 @@
  *    - "Bild-URL", "Marken-Logo-URL", "Blog-URL": vollständige, öffentlich
  *      erreichbare Links. Leer lassen, wenn nicht vorhanden.
  *    - "Marke": z. B. "adidas" oder "redsport" (Freitext).
- *    - Dezimaltrennzeichen bei Latitude/Longitude: Punkt (z. B. 51.1657).
+ *    - Latitude/Longitude: Punkt oder Komma als Dezimaltrennzeichen — beides
+ *      wird automatisch erkannt (Google Sheets exportiert je nach
+ *      Spracheinstellung mit Komma, z. B. "51,1657").
  *
- * 2. In Excel: Datei → Speichern unter/Herunterladen als → CSV (UTF-8).
+ * 2. Änderungen im Sheet sind sofort live — die Website lädt die Tabelle bei
+ *    jedem Seitenaufruf neu über den CSV-Export-Link unten. Kein Export, kein
+ *    Upload, keine weiteren Schritte nötig.
  *
- * 3. Die exportierte CSV-Datei im GitHub-Repo unter public/data/projects.csv
- *    ablegen (ersetzt die bestehende Datei). Am einfachsten direkt im Browser:
- *    https://github.com/BLLSHIT/scc-projektkarte/upload/main/public/data
- *    → Datei per Drag-and-Drop hochladen → "Commit changes" klicken.
- *    Kein Login außer dem bestehenden GitHub-Zugang nötig, keine IT-Freigabe.
+ * 3. Voraussetzung: Das Sheet muss auf "Jeder mit dem Link kann anzeigen"
+ *    freigegeben sein (Freigeben-Button oben rechts in Google Sheets).
  *
- * 4. Die Website lädt public/data/projects.csv automatisch bei jedem
- *    Seitenaufruf. Ist die Datei leer/ungültig, wird automatisch auf die
- *    lokalen Platzhalterdaten aus src/data/projects.ts zurückgefallen — die
- *    Karte bleibt also immer funktionsfähig.
+ * Ist die Tabelle nicht erreichbar oder enthält keine gültigen Zeilen, fällt
+ * die Website automatisch auf die lokalen Platzhalterdaten aus
+ * src/data/projects.ts zurück — die Karte bleibt also immer funktionsfähig.
  *
- * Später doch SharePoint anbinden? Sobald die IT anonyme Freigaben für den
- * Tenant erlaubt (oder eine App-Registrierung mit Microsoft-Graph-Zugriff
- * eingerichtet ist), einfach PROJECTS_CSV_URL unten auf den SharePoint-
- * CSV-Link umstellen — der Rest der Anbindung (Parser, Fallback) bleibt gleich.
+ * Link-Format: https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv
+ * (bei mehreren Tabellenblättern ggf. &gid={BLATT_ID} ergänzen).
  */
-export const PROJECTS_CSV_URL = `${import.meta.env.BASE_URL}data/projects.csv`;
+export const PROJECTS_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/1dBVxDlMSVo-PhBNmZi9WRkoTV7nuqYXDJXFZxBZf3ac/export?format=csv";
 
 /** Wie oft (ms) die CSV-Quelle beim erneuten Laden der Seite als "frisch" gilt. */
 export const PROJECTS_CACHE_MS = 5 * 60 * 1000;
