@@ -48,11 +48,28 @@ function toNumber(value: string | undefined): number | undefined {
   return Number.isFinite(num) ? num : undefined;
 }
 
+/** Grob gültiger geografischer Bereich — schließt korrupte Werte aus (z. B.
+ * Google Sheets, das Dezimalzahlen versehentlich als Tausender formatiert
+ * und dadurch riesige Zahlen wie 509650413 erzeugt). */
+function isValidCoord(latitude: number, longitude: number): boolean {
+  return (
+    latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180
+  );
+}
+
 function rowToProject(row: Record<string, string>, index: number): Project | null {
   const name = findColumn(row, "Projektname", "Name");
   const city = findColumn(row, "Ort", "Stadt", "City");
   let latitude = toNumber(findColumn(row, "Latitude", "Lat", "Breitengrad"));
   let longitude = toNumber(findColumn(row, "Longitude", "Lng", "Lon", "Längengrad"));
+
+  if (latitude != null && longitude != null && !isValidCoord(latitude, longitude)) {
+    console.warn(
+      `[useProjects] Zeile ${index + 2}: Latitude/Longitude außerhalb des gültigen Bereichs (${latitude}, ${longitude}) — vermutlich durch Zahlenformatierung in Google Sheets verfälscht (Spalten auf "Reiner Text" stellen). Werte werden ignoriert.`,
+    );
+    latitude = undefined;
+    longitude = undefined;
+  }
 
   if (latitude == null || longitude == null) {
     const mapsUrl = findColumn(
@@ -74,20 +91,22 @@ function rowToProject(row: Record<string, string>, index: number): Project | nul
     }
   }
 
-  if (!name || !city || latitude == null || longitude == null) {
+  if (!name || latitude == null || longitude == null) {
     console.warn(
-      `[useProjects] Zeile ${index + 2} übersprungen — Projektname, Ort sowie Latitude/Longitude oder ein gültiger Google-Maps-Link sind Pflichtfelder.`,
+      `[useProjects] Zeile ${index + 2} übersprungen — Projektname sowie gültige Latitude/Longitude oder ein gültiger Google-Maps-Link sind Pflichtfelder.`,
     );
     return null;
   }
 
   const id =
-    findColumn(row, "ID", "Id") || `${slugify(name)}-${slugify(city)}` || `projekt-${index}`;
+    findColumn(row, "ID", "Id") ||
+    `${slugify(name)}-${slugify(city ?? "")}` ||
+    `projekt-${index}`;
 
   return {
     id,
     name,
-    city,
+    city: city ?? "",
     country: findColumn(row, "Land", "Country") || "Deutschland",
     latitude,
     longitude,

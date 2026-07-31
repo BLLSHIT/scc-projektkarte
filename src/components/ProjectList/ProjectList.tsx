@@ -151,7 +151,7 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
                   />
                 </div>
                 <p className={styles.location}>
-                  {project.city}, {project.country}
+                  {[project.city, project.country].filter(Boolean).join(", ")}
                 </p>
 
                 {facts.length > 0 ? (
