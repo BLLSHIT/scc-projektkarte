@@ -14,10 +14,16 @@ function App() {
 
         <ProjectMap />
 
-        <p className={styles.legend}>
-          <span className={styles.legendDot} aria-hidden="true" />
-          Projektstandorte
-        </p>
+        <div className={styles.legend}>
+          <span className={styles.legendItem}>
+            <span className={styles.legendDot} aria-hidden="true" />
+            Projektstandorte
+          </span>
+          <span className={styles.legendItem}>
+            <span className={`${styles.legendDot} ${styles.legendDotPopUp}`} aria-hidden="true" />
+            AFP Courts Pop-Up Tour
+          </span>
+        </div>
       </section>
 
       <ProjectList />

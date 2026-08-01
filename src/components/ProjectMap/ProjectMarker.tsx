@@ -38,7 +38,7 @@ export function ProjectMarker({
 
   useEffect(() => {
     const icon = L.divIcon({
-      className: "scc-marker",
+      className: `scc-marker${project.popUpTour ? " scc-marker--popup" : ""}`,
       html: '<span class="scc-marker__dot" aria-hidden="true"></span>',
       iconSize: [22, 22],
       iconAnchor: [11, 11],

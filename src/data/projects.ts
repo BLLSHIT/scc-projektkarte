@@ -31,6 +31,8 @@ export type Project = {
   courtType?: string;
   /** "Indoor", "Outdoor" oder z. B. "Indoor, Outdoor" bei gemischten Anlagen. */
   indoorOutdoor?: string;
+  /** AFP Courts Pop-Up Tour — Marker wird schwarz statt grün dargestellt. */
+  popUpTour?: boolean;
   completionYear?: number;
   description?: string;
   image?: string;
