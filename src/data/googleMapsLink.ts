@@ -12,11 +12,15 @@
 export function extractLatLngFromGoogleMapsUrl(
   url: string,
 ): { latitude: number; longitude: number } | null {
-  const atMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (atMatch) return { latitude: Number(atMatch[1]), longitude: Number(atMatch[2]) };
-
+  // "!3d..!4d.." markiert die exakte Pin-Position eines Orts/Places und ist
+  // zuverlässiger als "@lat,lng" — Letzteres ist nur der aktuelle
+  // Kartenausschnitt/-mittelpunkt, der bei rausgezoomten oder verschachtelten
+  // Links (z. B. Hotel-Einträge) weit vom eigentlichen Ort abweichen kann.
   const bangMatch = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
   if (bangMatch) return { latitude: Number(bangMatch[1]), longitude: Number(bangMatch[2]) };
+
+  const atMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (atMatch) return { latitude: Number(atMatch[1]), longitude: Number(atMatch[2]) };
 
   const qMatch = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (qMatch) return { latitude: Number(qMatch[1]), longitude: Number(qMatch[2]) };

@@ -1,10 +1,20 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useProjects } from "../../data/useProjects";
 import { BrandBadge } from "../BrandBadge/BrandBadge";
 import { splitTags } from "../../utils/splitTags";
 import styles from "./ProjectList.module.css";
 
 const ALL = "__all__";
+const INITIAL_VISIBLE = 6;
+
+function shuffled<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
 
 export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {}) {
   const { projects } = useProjects();
@@ -13,6 +23,11 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
   const [courtBrand, setCourtBrand] = useState(ALL);
   const [indoorOutdoor, setIndoorOutdoor] = useState(ALL);
   const [year, setYear] = useState(ALL);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+
+  // Einmal pro Datenladung zufällig mischen, statt bei jedem Render neu —
+  // sonst würden Karten bei jeder Interaktion die Position wechseln.
+  const randomizedProjects = useMemo(() => shuffled(projects), [projects]);
 
   const courtTypes = useMemo(
     () => Array.from(new Set(projects.flatMap((p) => splitTags(p.courtType)))),
@@ -35,7 +50,7 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return projects.filter((project) => {
+    return randomizedProjects.filter((project) => {
       if (courtType !== ALL && !splitTags(project.courtType).includes(courtType)) return false;
       if (courtBrand !== ALL && project.courtBrand !== courtBrand) return false;
       if (indoorOutdoor !== ALL && !splitTags(project.indoorOutdoor).includes(indoorOutdoor)) {
@@ -48,7 +63,11 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
       }
       return true;
     });
-  }, [projects, search, courtType, courtBrand, indoorOutdoor, year]);
+  }, [randomizedProjects, search, courtType, courtBrand, indoorOutdoor, year]);
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE);
+  }, [search, courtType, courtBrand, indoorOutdoor, year]);
 
   const hasActiveFilters =
     search !== "" ||
@@ -153,7 +172,7 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
         <p className={styles.empty}>Keine Projekte gefunden.</p>
       ) : (
         <ul className={styles.grid}>
-          {filtered.map((project) => {
+          {filtered.slice(0, visibleCount).map((project) => {
             const facts = [
               project.courts != null
                 ? `${project.courts} Court${project.courts === 1 ? "" : "s"}`
@@ -205,6 +224,18 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
           })}
         </ul>
       )}
+
+      {filtered.length > visibleCount ? (
+        <div className={styles.loadMoreRow}>
+          <button
+            type="button"
+            className={styles.loadMoreButton}
+            onClick={() => setVisibleCount((count) => count + INITIAL_VISIBLE)}
+          >
+            Mehr anzeigen
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }
