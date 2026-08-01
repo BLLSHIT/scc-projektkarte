@@ -10,7 +10,11 @@ type ProjectMarkerProps = {
   isActive: boolean;
   hoverCapable: boolean;
   cardId: string;
+  /** Sofortiges Öffnen (Klick, Fokus/Tastatur). */
   onOpen: (id: string) => void;
+  /** Verzögertes Öffnen bei Maus-Hover (Hover-Intent, verhindert Flackern
+   * beim Vorbeistreifen an benachbarten Markern). */
+  onHoverOpen: (id: string) => void;
   /** Sofortiges Schließen (Tap-Toggle auf Touch, Tastatur). */
   onCloseImmediate: (id: string) => void;
   /** Verzögertes, abbrechbares Schließen (Hover-Intent auf Desktop). */
@@ -25,6 +29,7 @@ export function ProjectMarker({
   hoverCapable,
   cardId,
   onOpen,
+  onHoverOpen,
   onCloseImmediate,
   onScheduleClose,
   registerElement,
@@ -78,7 +83,7 @@ export function ProjectMarker({
         else toggle();
       };
       const handleMouseEnter = () => {
-        if (hoverCapableRef.current) onOpen(project.id);
+        if (hoverCapableRef.current) onHoverOpen(project.id);
       };
       const handleMouseLeave = () => {
         if (hoverCapableRef.current) onScheduleClose(project.id);

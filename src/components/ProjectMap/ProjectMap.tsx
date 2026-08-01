@@ -52,33 +52,60 @@ function MapContent({
   }, []);
   useEffect(() => clearCloseTimer, [clearCloseTimer]);
 
+  // Hover-Intent beim Öffnen: Ein Marker öffnet seine Karte erst, wenn die
+  // Maus kurz auf ihm verweilt — verhindert, dass ein unbeabsichtigtes
+  // Streifen eines benachbarten Markers (z. B. auf dem Weg von Marker zu
+  // Projektkarte) die gerade offene Karte durch eine andere ersetzt.
+  const openTimerRef = useRef<number | null>(null);
+  const clearOpenTimer = useCallback(() => {
+    if (openTimerRef.current != null) {
+      window.clearTimeout(openTimerRef.current);
+      openTimerRef.current = null;
+    }
+  }, []);
+  useEffect(() => clearOpenTimer, [clearOpenTimer]);
+
   const openProject = useCallback(
     (id: string) => {
       clearCloseTimer();
+      clearOpenTimer();
       setActiveId(id);
     },
-    [clearCloseTimer],
+    [clearCloseTimer, clearOpenTimer],
+  );
+  const scheduleOpen = useCallback(
+    (id: string) => {
+      clearCloseTimer();
+      clearOpenTimer();
+      openTimerRef.current = window.setTimeout(() => {
+        setActiveId(id);
+      }, 150);
+    },
+    [clearCloseTimer, clearOpenTimer],
   );
   const closeProjectImmediate = useCallback(
     (id: string) => {
       clearCloseTimer();
+      clearOpenTimer();
       setActiveId((prev) => (prev === id ? null : prev));
     },
-    [clearCloseTimer],
+    [clearCloseTimer, clearOpenTimer],
   );
   const scheduleClose = useCallback(
     (id: string) => {
+      clearOpenTimer();
       clearCloseTimer();
       closeTimerRef.current = window.setTimeout(() => {
         setActiveId((prev) => (prev === id ? null : prev));
       }, 300);
     },
-    [clearCloseTimer],
+    [clearCloseTimer, clearOpenTimer],
   );
   const closeAll = useCallback(() => {
     clearCloseTimer();
+    clearOpenTimer();
     setActiveId(null);
-  }, [clearCloseTimer]);
+  }, [clearCloseTimer, clearOpenTimer]);
   const registerElement = useCallback((id: string, el: HTMLElement | null) => {
     if (el) markerElsRef.current.set(id, el);
     else markerElsRef.current.delete(id);
@@ -191,6 +218,7 @@ function MapContent({
           hoverCapable={hoverCapable}
           cardId={cardIdFor(project.id)}
           onOpen={openProject}
+          onHoverOpen={scheduleOpen}
           onCloseImmediate={closeProjectImmediate}
           onScheduleClose={scheduleClose}
           registerElement={registerElement}
