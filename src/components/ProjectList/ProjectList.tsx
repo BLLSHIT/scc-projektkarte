@@ -5,7 +5,7 @@ import { splitTags } from "../../utils/splitTags";
 import styles from "./ProjectList.module.css";
 
 const ALL = "__all__";
-const INITIAL_VISIBLE = 6;
+const INITIAL_VISIBLE = 8;
 
 function shuffled<T>(items: T[]): T[] {
   const result = [...items];
