@@ -12,6 +12,7 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
   const [courtType, setCourtType] = useState(ALL);
   const [courtBrand, setCourtBrand] = useState(ALL);
   const [indoorOutdoor, setIndoorOutdoor] = useState(ALL);
+  const [year, setYear] = useState(ALL);
 
   const courtTypes = useMemo(
     () => Array.from(new Set(projects.flatMap((p) => splitTags(p.courtType)))),
@@ -25,6 +26,12 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
     () => Array.from(new Set(projects.flatMap((p) => splitTags(p.indoorOutdoor)))),
     [projects],
   );
+  const years = useMemo(
+    () =>
+      Array.from(new Set(projects.map((p) => p.completionYear).filter((y): y is number => y != null)))
+        .sort((a, b) => b - a),
+    [projects],
+  );
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -34,21 +41,27 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
       if (indoorOutdoor !== ALL && !splitTags(project.indoorOutdoor).includes(indoorOutdoor)) {
         return false;
       }
+      if (year !== ALL && String(project.completionYear) !== year) return false;
       if (query) {
         const haystack = `${project.name} ${project.city} ${project.country}`.toLowerCase();
         if (!haystack.includes(query)) return false;
       }
       return true;
     });
-  }, [projects, search, courtType, courtBrand, indoorOutdoor]);
+  }, [projects, search, courtType, courtBrand, indoorOutdoor, year]);
 
   const hasActiveFilters =
-    search !== "" || courtType !== ALL || courtBrand !== ALL || indoorOutdoor !== ALL;
+    search !== "" ||
+    courtType !== ALL ||
+    courtBrand !== ALL ||
+    indoorOutdoor !== ALL ||
+    year !== ALL;
   const resetFilters = () => {
     setSearch("");
     setCourtType(ALL);
     setCourtBrand(ALL);
     setIndoorOutdoor(ALL);
+    setYear(ALL);
   };
 
   return (
@@ -106,6 +119,21 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
             {indoorOutdoorOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        {years.length > 0 ? (
+          <select
+            className={styles.select}
+            value={year}
+            onChange={(event) => setYear(event.target.value)}
+            aria-label="Nach Fertigstellungsjahr filtern"
+          >
+            <option value={ALL}>Jahr</option>
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
               </option>
             ))}
           </select>
@@ -169,7 +197,7 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Zum Projektbericht →
+                    Zum Projekt →
                   </a>
                 ) : null}
               </li>

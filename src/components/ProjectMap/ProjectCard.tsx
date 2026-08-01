@@ -144,7 +144,7 @@ export function ProjectCard({
           target="_blank"
           rel="noreferrer"
         >
-          Zum Projektbericht →
+          Zum Projekt →
         </a>
       ) : null}
     </div>
