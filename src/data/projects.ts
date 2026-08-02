@@ -33,6 +33,8 @@ export type Project = {
   indoorOutdoor?: string;
   /** AFP Courts Pop-Up Tour — Marker wird schwarz statt grün dargestellt. */
   popUpTour?: boolean;
+  /** Nur Projekte mit live=true werden auf der Website angezeigt. */
+  live?: boolean;
   completionYear?: number;
   description?: string;
   image?: string;

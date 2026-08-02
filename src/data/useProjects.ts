@@ -116,6 +116,7 @@ function rowToProject(row: Record<string, string>, index: number): Project | nul
     popUpTour: Boolean(
       findColumn(row, "Pop-Up-Tour", "Pop-Up Tour", "PopUpTour", "AFP Pop-Up Tour", "Pop-Up"),
     ),
+    live: Boolean(findColumn(row, "Live")),
     completionYear: toNumber(findColumn(row, "Fertigstellungsjahr", "Jahr")),
     description: findColumn(row, "Beschreibung", "Description"),
     image: findColumn(row, "Bild-URL", "Bild", "Image"),
@@ -154,7 +155,8 @@ export function useProjects(): ProjectsState {
         const rows = parseCsv(text);
         const parsed = rows
           .map((row, index) => rowToProject(row, index))
-          .filter((project): project is Project => project !== null);
+          .filter((project): project is Project => project !== null)
+          .filter((project) => project.live);
 
         if (parsed.length === 0) {
           throw new Error("CSV enthielt keine gültigen Projektzeilen.");
