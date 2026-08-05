@@ -12,7 +12,7 @@
  *    Spalten (erste Zeile, Reihenfolge egal, Groß-/Kleinschreibung egal):
  *
  *      ID | Projektname | Ort | Land | Latitude | Longitude | Google-Maps-Link |
- *      Courts | Court-Typ | Indoor/Outdoor | Pop-Up-Tour | Live |
+ *      Courts | Court-Typ | Indoor/Outdoor | Pop-Up-Tour | Live | Position |
  *      Fertigstellungsjahr | Beschreibung | Bild-URL | Blog-URL | Marke |
  *      Marken-Logo-URL
  *
@@ -23,15 +23,26 @@
  *      (praktisch, um Projekte vorzubereiten, bevor sie veröffentlicht werden).
  *    - "Pop-Up-Tour": beliebiger Wert (z. B. "x") markiert ein Projekt als Teil
  *      der AFP Courts Pop-Up Tour — der Marker auf der Karte wird dann schwarz
- *      statt grün dargestellt. Leer lassen für normale Projekte.
+ *      statt grün dargestellt, und es erscheint immer mit dem AFP-Logo (statt
+ *      der Courtmarke). Leer lassen für normale Projekte.
+ *    - "Position": Zahl 1-4 — pinnt ein Projekt auf einen festen Platz in der
+ *      ersten Reihe der Projektliste (Reihe hat 4 Karten). Gilt NUR in der
+ *      Standardansicht ohne aktive Suche/Filter; sobald gefiltert/gesucht
+ *      wird, greift die normale (zufällige) Sortierung für alle Projekte.
+ *      Jede Zahl nur einmal vergeben — bei Duplikaten gewinnt die erste
+ *      Zeile mit dieser Zahl, die zweite wird normal (zufällig) einsortiert.
+ *      Leer lassen für normale, zufällig sortierte Projekte.
  *    - "Bild-URL", "Marken-Logo-URL", "Blog-URL": vollständige, öffentlich
  *      erreichbare Links. Leer lassen, wenn nicht vorhanden.
  *    - "Marke": z. B. "adidas" oder "redsport" (Freitext).
- *    - "Court-Typ", "Indoor/Outdoor": Mehrere Werte durch Komma oder Semikolon
- *      trennen, z. B. "High Competition, AFP, Single" oder "Indoor, Outdoor"
- *      bei gemischten Anlagen — werden auf der Website automatisch als
- *      einzelne, filterbare Tags angezeigt (statt als ein zusammengeschriebener
- *      Text).
+ *    - "Indoor/Outdoor": Mehrere Werte durch Komma oder Semikolon trennen,
+ *      z. B. "Indoor, Outdoor" bei gemischten Anlagen — werden auf der
+ *      Website automatisch als einzelne, filterbare Tags angezeigt.
+ *    - "Court-Typ": Mehrere Modelle durch Komma oder Semikolon trennen, mit
+ *      optionaler Anzahl je Modell, z. B. "5x High Competition, 4x AFP,
+ *      4x Single" — wird auf der Website als übersichtliche Liste mit Anzahl
+ *      pro Modell dargestellt (Anzahl ist optional, "High Competition, AFP"
+ *      ohne Zahlen funktioniert weiterhin).
  *    - Latitude/Longitude: Punkt oder Komma als Dezimaltrennzeichen — beides
  *      wird automatisch erkannt (Google Sheets exportiert je nach
  *      Spracheinstellung mit Komma, z. B. "51,1657").

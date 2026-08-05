@@ -179,6 +179,30 @@
   padding: 3px 9px;
 }
 
+.courtBreakdown {
+  margin: 10px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid #ecf0ed;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.courtBreakdown li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #3d3d3a;
+}
+
+.courtCount {
+  font-weight: 700;
+  color: #036147;
+  min-width: 1.6em;
+}
+
 .link {
   display: inline-flex;
   align-items: center;

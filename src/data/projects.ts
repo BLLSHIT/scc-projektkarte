@@ -35,6 +35,10 @@ export type Project = {
   popUpTour?: boolean;
   /** Nur Projekte mit live=true werden auf der Website angezeigt. */
   live?: boolean;
+  /** 1-4: feste Position in der ersten Reihe der Projektliste (nur ohne
+   * aktiven Filter/Suche). Werte außerhalb 1-4 oder doppelt vergebene
+   * Positionen (ab dem zweiten Auftreten) werden ignoriert. */
+  pinnedPosition?: number;
   completionYear?: number;
   description?: string;
   image?: string;

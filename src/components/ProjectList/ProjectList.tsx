@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useProjects } from "../../data/useProjects";
+import type { Project } from "../../data/projects";
 import { BrandBadge } from "../BrandBadge/BrandBadge";
 import { resolveBrandDisplay } from "../BrandBadge/resolveBrand";
 import { splitTags } from "../../utils/splitTags";
+import { parseCourtBreakdown } from "../../utils/parseCourtBreakdown";
 import styles from "./ProjectList.module.css";
 
 const ALL = "__all__";
@@ -17,6 +19,24 @@ function shuffled<T>(items: T[]): T[] {
   return result;
 }
 
+/** Projekte mit pinnedPosition (1-4) vorn in dieser Reihenfolge, Rest gemischt
+ * dahinter. Bei doppelt vergebener Position gewinnt das erste Vorkommen. */
+function withPinnedFirstRow(projects: Project[]): Project[] {
+  const pinnedByPosition = new Map<number, Project>();
+  for (const project of projects) {
+    const pos = project.pinnedPosition;
+    if (pos != null && !pinnedByPosition.has(pos)) {
+      pinnedByPosition.set(pos, project);
+    }
+  }
+  const pinned = [1, 2, 3, 4]
+    .map((pos) => pinnedByPosition.get(pos))
+    .filter((p): p is Project => p != null);
+  const pinnedIds = new Set(pinned.map((p) => p.id));
+  const rest = shuffled(projects.filter((p) => !pinnedIds.has(p.id)));
+  return [...pinned, ...rest];
+}
+
 export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {}) {
   const { projects } = useProjects();
   const [search, setSearch] = useState("");
@@ -26,12 +46,25 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
   const [year, setYear] = useState(ALL);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
-  // Einmal pro Datenladung zufällig mischen, statt bei jedem Render neu —
-  // sonst würden Karten bei jeder Interaktion die Position wechseln.
-  const randomizedProjects = useMemo(() => shuffled(projects), [projects]);
+  const hasActiveFilters =
+    search !== "" ||
+    courtType !== ALL ||
+    courtBrand !== ALL ||
+    indoorOutdoor !== ALL ||
+    year !== ALL;
+
+  // Zwei stabile Grundreihenfolgen, einmal pro Datenladung berechnet (nicht
+  // bei jedem Render neu, sonst würden Karten bei jeder Interaktion
+  // springen): mit festen Positionen 1-4 vorn (Standardansicht ohne Filter)
+  // und eine rein zufällige Reihenfolge (sobald gefiltert/gesucht wird —
+  // feste Positionen gelten dann nicht mehr, siehe Klärung mit Billy).
+  const pinnedFirstOrder = useMemo(() => withPinnedFirstRow(projects), [projects]);
+  const fullyShuffledOrder = useMemo(() => shuffled(projects), [projects]);
+  const baseOrder = hasActiveFilters ? fullyShuffledOrder : pinnedFirstOrder;
 
   const courtTypes = useMemo(
-    () => Array.from(new Set(projects.flatMap((p) => splitTags(p.courtType)))),
+    () =>
+      Array.from(new Set(projects.flatMap((p) => parseCourtBreakdown(p.courtType).map((i) => i.label)))),
     [projects],
   );
   const courtBrands = useMemo(
@@ -51,8 +84,13 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return randomizedProjects.filter((project) => {
-      if (courtType !== ALL && !splitTags(project.courtType).includes(courtType)) return false;
+    return baseOrder.filter((project) => {
+      if (
+        courtType !== ALL &&
+        !parseCourtBreakdown(project.courtType).some((i) => i.label === courtType)
+      ) {
+        return false;
+      }
       if (courtBrand !== ALL && project.courtBrand !== courtBrand) return false;
       if (indoorOutdoor !== ALL && !splitTags(project.indoorOutdoor).includes(indoorOutdoor)) {
         return false;
@@ -64,18 +102,12 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
       }
       return true;
     });
-  }, [randomizedProjects, search, courtType, courtBrand, indoorOutdoor, year]);
+  }, [baseOrder, search, courtType, courtBrand, indoorOutdoor, year]);
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE);
   }, [search, courtType, courtBrand, indoorOutdoor, year]);
 
-  const hasActiveFilters =
-    search !== "" ||
-    courtType !== ALL ||
-    courtBrand !== ALL ||
-    indoorOutdoor !== ALL ||
-    year !== ALL;
   const resetFilters = () => {
     setSearch("");
     setCourtType(ALL);
@@ -175,11 +207,11 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
         <ul className={styles.grid}>
           {filtered.slice(0, visibleCount).map((project) => {
             const brandDisplay = resolveBrandDisplay(project);
+            const courtBreakdown = parseCourtBreakdown(project.courtType);
             const facts = [
               project.courts != null
                 ? `${project.courts} Court${project.courts === 1 ? "" : "s"}`
                 : null,
-              ...splitTags(project.courtType),
               ...splitTags(project.indoorOutdoor),
               project.completionYear != null ? String(project.completionYear) : null,
             ].filter((f): f is string => Boolean(f));
@@ -207,6 +239,19 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
                   <ul className={styles.facts}>
                     {facts.map((fact) => (
                       <li key={fact}>{fact}</li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                {courtBreakdown.length > 0 ? (
+                  <ul className={styles.courtBreakdown}>
+                    {courtBreakdown.map((item, i) => (
+                      <li key={`${item.label}-${i}`}>
+                        {item.count != null ? (
+                          <span className={styles.courtCount}>{item.count}×</span>
+                        ) : null}
+                        {item.label}
+                      </li>
                     ))}
                   </ul>
                 ) : null}

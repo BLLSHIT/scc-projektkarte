@@ -117,6 +117,10 @@ function rowToProject(row: Record<string, string>, index: number): Project | nul
       findColumn(row, "Pop-Up-Tour", "Pop-Up Tour", "PopUpTour", "AFP Pop-Up Tour", "Pop-Up"),
     ),
     live: Boolean(findColumn(row, "Live")),
+    pinnedPosition: (() => {
+      const n = toNumber(findColumn(row, "Position", "Reihenfolge", "Fixe Position"));
+      return n != null && n >= 1 && n <= 4 ? n : undefined;
+    })(),
     completionYear: toNumber(findColumn(row, "Fertigstellungsjahr", "Jahr")),
     description: findColumn(row, "Beschreibung", "Description"),
     image: findColumn(row, "Bild-URL", "Bild", "Image"),
