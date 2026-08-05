@@ -12,9 +12,9 @@
  *    Spalten (erste Zeile, Reihenfolge egal, Groß-/Kleinschreibung egal):
  *
  *      ID | Projektname | Ort | Land | Latitude | Longitude | Google-Maps-Link |
- *      Courts | Court-Typ | Indoor/Outdoor | Pop-Up-Tour | Live | Position |
- *      Fertigstellungsjahr | Beschreibung | Bild-URL | Blog-URL | Marke |
- *      Marken-Logo-URL
+ *      Courts | Court-Typ | Indoor/Outdoor | Pop-Up-Tour | Live |
+ *      Position (oder Highlight) | Fertigstellungsjahr | Beschreibung |
+ *      Bild-URL | Blog-URL | Marke | Marken-Logo-URL
  *
  *    - "ID" optional — fehlt sie, wird automatisch eine aus Projektname + Ort
  *      erzeugt.
@@ -25,7 +25,7 @@
  *      der AFP Courts Pop-Up Tour — Marker auf der Karte und Marken-Badge
  *      zeigen dann immer das AFP-Logo statt eines grünen Punkts bzw. der
  *      Courtmarke. Leer lassen für normale Projekte.
- *    - "Position": Zahl 1-4 — pinnt ein Projekt auf einen festen Platz in der
+ *    - "Position" (auch als "Highlight" erkannt): Zahl 1-4 — pinnt ein Projekt auf einen festen Platz in der
  *      ersten Reihe der Projektliste (Reihe hat 4 Karten). Gilt NUR in der
  *      Standardansicht ohne aktive Suche/Filter; sobald gefiltert/gesucht
  *      wird, greift die normale (zufällige) Sortierung für alle Projekte.

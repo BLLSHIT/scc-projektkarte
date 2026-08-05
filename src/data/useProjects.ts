@@ -118,7 +118,7 @@ function rowToProject(row: Record<string, string>, index: number): Project | nul
     ),
     live: Boolean(findColumn(row, "Live")),
     pinnedPosition: (() => {
-      const n = toNumber(findColumn(row, "Position", "Reihenfolge", "Fixe Position"));
+      const n = toNumber(findColumn(row, "Position", "Highlight", "Reihenfolge", "Fixe Position"));
       return n != null && n >= 1 && n <= 4 ? n : undefined;
     })(),
     completionYear: toNumber(findColumn(row, "Fertigstellungsjahr", "Jahr")),
