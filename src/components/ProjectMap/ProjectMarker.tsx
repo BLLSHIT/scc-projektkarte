@@ -47,8 +47,8 @@ export function ProjectMarker({
       ? L.divIcon({
           className: "scc-marker scc-marker--popup",
           html: `<span class="scc-marker__logo-wrap" aria-hidden="true"><img class="scc-marker__logo-img" src="${AFP_LOGO_URL}" alt="" onerror="this.style.visibility='hidden'" /></span>`,
-          iconSize: [28, 28],
-          iconAnchor: [14, 14],
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
         })
       : L.divIcon({
           className: "scc-marker",

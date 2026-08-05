@@ -22,9 +22,9 @@
  *      auf der Website angezeigt — leere Zeile = Projekt bleibt unsichtbar
  *      (praktisch, um Projekte vorzubereiten, bevor sie veröffentlicht werden).
  *    - "Pop-Up-Tour": beliebiger Wert (z. B. "x") markiert ein Projekt als Teil
- *      der AFP Courts Pop-Up Tour — der Marker auf der Karte wird dann schwarz
- *      statt grün dargestellt, und es erscheint immer mit dem AFP-Logo (statt
- *      der Courtmarke). Leer lassen für normale Projekte.
+ *      der AFP Courts Pop-Up Tour — Marker auf der Karte und Marken-Badge
+ *      zeigen dann immer das AFP-Logo statt eines grünen Punkts bzw. der
+ *      Courtmarke. Leer lassen für normale Projekte.
  *    - "Position": Zahl 1-4 — pinnt ein Projekt auf einen festen Platz in der
  *      ersten Reihe der Projektliste (Reihe hat 4 Karten). Gilt NUR in der
  *      Standardansicht ohne aktive Suche/Filter; sobald gefiltert/gesucht
