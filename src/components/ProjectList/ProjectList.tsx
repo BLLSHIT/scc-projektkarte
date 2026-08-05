@@ -261,7 +261,7 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
                     className={styles.link}
                     href={project.blogUrl}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                   >
                     Zum Projekt →
                   </a>
@@ -272,7 +272,7 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
         </ul>
       )}
 
-      {filtered.length > visibleCount ? (
+      {filtered.length > 0 ? (
         <div className={styles.loadMoreRow}>
           <button
             type="button"

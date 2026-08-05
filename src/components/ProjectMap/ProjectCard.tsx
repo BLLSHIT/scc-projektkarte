@@ -157,7 +157,7 @@ export function ProjectCard({
           className={styles.link}
           href={project.blogUrl}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
         >
           Zum Projekt →
         </a>
