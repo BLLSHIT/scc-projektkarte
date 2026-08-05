@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { Project } from "../../data/projects";
 import { BrandBadge } from "../BrandBadge/BrandBadge";
+import { resolveBrandDisplay } from "../BrandBadge/resolveBrand";
 import { splitTags } from "../../utils/splitTags";
 import styles from "./ProjectCard.module.css";
 
@@ -70,6 +71,8 @@ export function ProjectCard({
     setStyle({ left, top });
   }, [isFloating, anchor?.x, anchor?.y, containerSize?.width, containerSize?.height, project.id]);
 
+  const brandDisplay = resolveBrandDisplay(project);
+
   const facts = [
     project.courts != null ? `${project.courts} Court${project.courts === 1 ? "" : "s"}` : null,
     ...splitTags(project.courtType),
@@ -115,9 +118,9 @@ export function ProjectCard({
       <div className={styles.nameRow}>
         <p className={styles.name}>{project.name}</p>
         <BrandBadge
-          brand={project.courtBrand}
-          logoUrl={project.courtBrandLogo}
-          logoClassName={styles.brandLogo}
+          brand={brandDisplay.brand}
+          logoUrl={brandDisplay.logoUrl}
+          logoClassName={brandDisplay.isWide ? styles.brandLogoWide : styles.brandLogo}
           badgeClassName={styles.brandBadge}
         />
       </div>

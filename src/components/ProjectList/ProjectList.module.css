@@ -131,6 +131,16 @@
   flex-shrink: 0;
 }
 
+/* redsport-Logo braucht mehr Breite, um bei gleicher Höhe genauso lesbar
+   wie adidas zu wirken. */
+.brandLogoWide {
+  height: 26px;
+  width: auto;
+  max-width: 112px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .brandBadge {
   flex-shrink: 0;
   font-size: 0.68rem;
