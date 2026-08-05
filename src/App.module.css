@@ -53,6 +53,21 @@
   flex-shrink: 0;
 }
 
-.legendDotPopUp {
-  background: #141414;
+.legendLogoWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid #141414;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.legendLogoImg {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
 }

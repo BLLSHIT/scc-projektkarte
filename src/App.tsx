@@ -1,5 +1,6 @@
 import { ProjectMap } from "./components/ProjectMap/ProjectMap";
 import { ProjectList } from "./components/ProjectList/ProjectList";
+import { AFP_LOGO_URL } from "./components/BrandBadge/resolveBrand";
 import styles from "./App.module.css";
 
 function App() {
@@ -17,10 +18,12 @@ function App() {
         <div className={styles.legend}>
           <span className={styles.legendItem}>
             <span className={styles.legendDot} aria-hidden="true" />
-            Projektstandorte
+            Projekte SCC Courts
           </span>
           <span className={styles.legendItem}>
-            <span className={`${styles.legendDot} ${styles.legendDotPopUp}`} aria-hidden="true" />
+            <span className={styles.legendLogoWrap} aria-hidden="true">
+              <img className={styles.legendLogoImg} src={AFP_LOGO_URL} alt="" />
+            </span>
             AFP Courts Pop-Up Tour
           </span>
         </div>

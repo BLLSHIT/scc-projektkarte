@@ -1,7 +1,7 @@
 import type { Project } from "../../data/projects";
 
-/** Fixes Logo für alle AFP Courts Pop-Up Tour Projekte. */
-const AFP_LOGO_URL = "https://www.scc-courts.de/wp-content/uploads/2025/03/logo-p.svg";
+/** Fixes Logo für alle AFP Courts Pop-Up Tour Projekte (Karte, Karten, Liste, Legende). */
+export const AFP_LOGO_URL = "https://www.scc-courts.de/wp-content/uploads/2025/03/logo-p.svg";
 
 export type BrandDisplay = {
   brand?: string;

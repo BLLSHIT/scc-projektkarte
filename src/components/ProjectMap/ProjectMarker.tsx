@@ -3,6 +3,7 @@ import L from "leaflet";
 import { useMap } from "react-leaflet";
 import type { Project } from "../../data/projects";
 import { projectToMapPoint } from "../../config/mapConfig";
+import { AFP_LOGO_URL } from "../BrandBadge/resolveBrand";
 
 type ProjectMarkerProps = {
   project: Project;
@@ -42,12 +43,19 @@ export function ProjectMarker({
   isActiveRef.current = isActive;
 
   useEffect(() => {
-    const icon = L.divIcon({
-      className: `scc-marker${project.popUpTour ? " scc-marker--popup" : ""}`,
-      html: '<span class="scc-marker__dot" aria-hidden="true"></span>',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11],
-    });
+    const icon = project.popUpTour
+      ? L.divIcon({
+          className: "scc-marker scc-marker--popup",
+          html: `<span class="scc-marker__logo-wrap" aria-hidden="true"><img class="scc-marker__logo-img" src="${AFP_LOGO_URL}" alt="" onerror="this.style.visibility='hidden'" /></span>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        })
+      : L.divIcon({
+          className: "scc-marker",
+          html: '<span class="scc-marker__dot" aria-hidden="true"></span>',
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
+        });
 
     const marker = L.marker(projectToMapPoint(project.latitude, project.longitude), {
       icon,
