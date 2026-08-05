@@ -232,21 +232,27 @@
 }
 
 .loadMoreRow {
+  position: sticky;
+  bottom: 16px;
   display: flex;
   justify-content: center;
   margin-top: 28px;
+  z-index: 20;
+  pointer-events: none;
 }
 
 .loadMoreButton {
   padding: 11px 24px;
   border: 1px solid #036147;
   border-radius: 8px;
-  background: transparent;
+  background: #fff;
   color: #036147;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(3, 25, 18, 0.18);
   transition: background-color 0.15s ease;
+  pointer-events: auto;
 }
 
 .loadMoreButton:hover,
