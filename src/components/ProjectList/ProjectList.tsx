@@ -64,7 +64,9 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
 
   const courtTypes = useMemo(
     () =>
-      Array.from(new Set(projects.flatMap((p) => parseCourtBreakdown(p.courtType).map((i) => i.label)))),
+      Array.from(
+        new Set(projects.flatMap((p) => parseCourtBreakdown(p.courtType).map((i) => i.label))),
+      ).sort((a, b) => a.localeCompare(b, "de")),
     [projects],
   );
   const courtBrands = useMemo(
