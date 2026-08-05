@@ -273,6 +273,7 @@ export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) 
           attributionControl={false}
           dragging={true}
           scrollWheelZoom={true}
+          wheelPxPerZoomLevel={24}
           doubleClickZoom={true}
           touchZoom={true}
           boxZoom={false}
