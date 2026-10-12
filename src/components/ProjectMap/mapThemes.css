@@ -3,8 +3,8 @@
  *
  * Global statt CSS-Modul, weil Leaflet die SVG-Ebene und die Marker selbst
  * ins DOM setzt. Ein Theme ist ein Satz CSS-Variablen am Karten-Wrapper
- * (data-map-theme); Karte, Marker (markers.css), Verbindungslinie und
- * Zoom-Steuerung lesen daraus ihre Farben.
+ * (data-map-theme); Karte, Marker (markers.css) und Zoom-Steuerung lesen
+ * daraus ihre Farben.
  */
 
 /* Weicher Wechsel zwischen heller und dunkler Karte. */
@@ -161,7 +161,6 @@
   --scc-popup-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
   --scc-popup-halo: rgba(255, 255, 255, 0.22);
   --scc-popup-pulse: rgba(255, 255, 255, 0.75);
-  --scc-connector: #7ff0c5;
   --scc-zoom-bg: #102a21;
   --scc-zoom-color: #7ff0c5;
   --scc-zoom-bg-hover: #173d30;

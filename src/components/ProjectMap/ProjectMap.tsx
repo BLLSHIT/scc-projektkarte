@@ -10,7 +10,6 @@ import { useIsMobileViewport } from "../../hooks/useIsMobileViewport";
 import { ProjectMarker } from "./ProjectMarker";
 import { ProjectCard } from "./ProjectCard";
 import { useProjectAutoplay } from "./useProjectAutoplay";
-import { CardConnector } from "./CardConnector";
 import { INTRO_PENDING_CLASS, applyHomeView, useMapIntro } from "./useMapIntro";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import "./markers.css";
@@ -328,15 +327,6 @@ function MapContent({
           onMouseLeave={
             hoverCapable ? () => scheduleClose(activeProject.id) : undefined
           }
-          cardId={cardIdFor(activeProject.id)}
-          calm={isAutoShown}
-          leaving={isAutoLeaving}
-        />
-      ) : null}
-      {!isMobileViewport && activeProject && anchor ? (
-        <CardConnector
-          key={activeProject.id}
-          project={activeProject}
           cardId={cardIdFor(activeProject.id)}
           calm={isAutoShown}
           leaving={isAutoLeaving}

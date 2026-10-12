@@ -28,8 +28,9 @@ export function projectToMapPoint(
   return [MAP_IMAGE_SIZE.height - y, x];
 }
 
-/** Ausgangsansicht nach dem Einstieg: der DACH-Raum. */
-export const HOME_GEO_BOUNDS = { south: 45.8, west: 5.87, north: 55.06, east: 17.17 };
+/** Ausgangsansicht nach dem Einstieg: Deutschland formatfüllend; Österreich
+ * und die Schweiz sind am unteren Rand angeschnitten zu sehen. */
+export const HOME_GEO_BOUNDS = { south: 47.27, west: 5.87, north: 55.06, east: 15.04 };
 
 /** [[0, 0], [height, width]] — Grenzen der Zeichenfläche für CRS.Simple. */
 export const MAP_PIXEL_BOUNDS: [[number, number], [number, number]] = [

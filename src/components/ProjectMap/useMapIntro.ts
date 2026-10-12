@@ -21,16 +21,26 @@ const HOME_BOUNDS: LatLngBoundsExpression = [
   projectToMapPoint(HOME_GEO_BOUNDS.north, HOME_GEO_BOUNDS.east),
 ];
 
+/** Abstand der Ausgangsansicht zum oberen und unteren Kartenrand (px). */
+const HOME_VERTICAL_PADDING = 16;
+
 /** Auf breiten Karten bleibt links Platz für die schwebende Projektkarte. */
 const homeLeftPadding = (map: LeafletMap) => (map.getSize().x > 760 ? 320 : 24);
 
 function homeViewOptions(map: LeafletMap): FitBoundsOptions {
-  return { paddingTopLeft: [homeLeftPadding(map), 28], paddingBottomRight: [24, 28] };
+  return {
+    paddingTopLeft: [homeLeftPadding(map), HOME_VERTICAL_PADDING],
+    paddingBottomRight: [24, HOME_VERTICAL_PADDING],
+  };
 }
 
 /** Maßstab der Ausgangsansicht in Bildschirmpixeln je Karteneinheit. */
 export function homeViewScale(map: LeafletMap): number {
-  const zoom = map.getBoundsZoom(HOME_BOUNDS, false, point(homeLeftPadding(map) + 24, 56));
+  const zoom = map.getBoundsZoom(
+    HOME_BOUNDS,
+    false,
+    point(homeLeftPadding(map) + 24, 2 * HOME_VERTICAL_PADDING),
+  );
   return map.getZoomScale(zoom, 0);
 }
 
