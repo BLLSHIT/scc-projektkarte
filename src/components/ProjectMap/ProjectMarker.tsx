@@ -97,7 +97,12 @@ export function ProjectMarker({
       const handleMouseLeave = () => {
         if (hoverCapableRef.current) onScheduleClose(project.id);
       };
-      const handleFocus = () => onOpen(project.id);
+      // Nur Tastaturfokus öffnet die Karte. Bei Tipp/Klick setzt der Browser
+      // ebenfalls den Fokus — würde er hier öffnen, schlösse der direkt
+      // folgende Klick (Tap-Toggle) die Karte sofort wieder.
+      const handleFocus = () => {
+        if (el.matches(":focus-visible")) onOpen(project.id);
+      };
       const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();

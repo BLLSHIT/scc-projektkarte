@@ -213,12 +213,16 @@ function MapContent({
 
     const fitAndClampZoom = () => {
       map.invalidateSize();
-      map.fitBounds(MAP_PIXEL_BOUNDS, { animate: false });
-      const fitZoom = map.getZoom();
-      map.setMinZoom(fitZoom);
-      map.setMaxZoom(fitZoom + 4);
+      // Kleinste Zoomstufe: Die Karte füllt den Container vollständig — so
+      // bleiben auch im Hochformat der mobilen Ansicht keine leeren Ränder.
+      // (Vorher zurücksetzen, sonst begrenzt die alte Grenze die Berechnung.)
+      map.setMinZoom(-5);
+      const coverZoom = map.getBoundsZoom(MAP_PIXEL_BOUNDS, true);
+      map.setMinZoom(coverZoom);
+      map.setMaxZoom(coverZoom + 4);
       // Ab dem Einstieg ist die Deutschland-Ansicht die Ausgangsansicht.
       if (introStartedRef.current) applyHomeView(map);
+      else map.fitBounds(MAP_PIXEL_BOUNDS, { animate: false });
       updateSize();
     };
 

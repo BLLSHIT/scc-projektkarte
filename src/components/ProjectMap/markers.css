@@ -139,6 +139,31 @@
   }
 }
 
+/* Mobile Ansicht: kleinere Marker, damit sie sich auf der schmalen Karte
+   weniger überdecken. Die Tippfläche (Leaflet-Icon) bleibt gleich groß. */
+@media (max-width: 640px) {
+  .scc-marker__dot {
+    width: 10px;
+    height: 10px;
+    margin: 6px;
+    border-width: 1.5px;
+  }
+
+  .scc-marker__logo-wrap {
+    width: 16px;
+    height: 16px;
+    margin: 2px;
+  }
+
+  .scc-marker--active::after {
+    inset: 6px;
+  }
+
+  .scc-marker--popup.scc-marker--active::after {
+    inset: 2px;
+  }
+}
+
 @keyframes scc-marker-appear {
   from {
     opacity: 0;

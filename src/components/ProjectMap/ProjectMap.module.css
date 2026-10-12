@@ -63,6 +63,14 @@
   }
 }
 
+/* Mobile Ansicht: Hochformat, damit Deutschland groß genug ist, um die
+   Marker einzeln zu treffen (Breakpoint wie useIsMobileViewport). */
+@media (max-width: 640px) {
+  .mapWrapper {
+    aspect-ratio: 4 / 5;
+  }
+}
+
 /* Hell/Dunkel-Umschalter oben rechts, im Stil der Zoom-Steuerung. */
 .themeToggle {
   position: absolute;
