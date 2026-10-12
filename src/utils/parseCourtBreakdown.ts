@@ -21,3 +21,12 @@ export function parseCourtBreakdown(value?: string): CourtBreakdownItem[] {
       return { label: segment };
     });
 }
+
+/**
+ * Court-Anzahl eines Projekts: Wert der Spalte "Courts", ersatzweise die
+ * Summe der Stückzahlen aus der Court-Typ-Spalte (0, wenn beides fehlt).
+ */
+export function resolveCourtCount(courts?: number, courtType?: string): number {
+  if (courts != null) return courts;
+  return parseCourtBreakdown(courtType).reduce((sum, item) => sum + (item.count ?? 0), 0);
+}

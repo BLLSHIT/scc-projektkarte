@@ -61,9 +61,10 @@
  * 3. Voraussetzung: Das Sheet muss auf "Jeder mit dem Link kann anzeigen"
  *    freigegeben sein (Freigeben-Button oben rechts in Google Sheets).
  *
- * Ist die Tabelle nicht erreichbar oder enthält keine gültigen Zeilen, fällt
- * die Website automatisch auf die lokalen Platzhalterdaten aus
- * src/data/projects.ts zurück — die Karte bleibt also immer funktionsfähig.
+ * Ist die Tabelle nicht erreichbar oder enthält keine gültigen Zeilen, zeigt
+ * die Live-Seite die Karte ohne Marker und einen Hinweis, dass die Projekte
+ * gerade nicht geladen werden können. Die Platzhalterdaten aus
+ * src/data/projects.ts erscheinen nur in der lokalen Entwicklung.
  *
  * Link-Format: https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv
  * (bei mehreren Tabellenblättern ggf. &gid={BLATT_ID} ergänzen).

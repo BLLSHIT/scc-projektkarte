@@ -22,7 +22,7 @@ Erzeugt zwei Seiten in `dist/`:
 
 ## Projekte pflegen
 
-- Lokale Platzhalter-/Fallbackdaten: [`src/data/projects.ts`](src/data/projects.ts)
+- Platzhalterdaten (nur lokale Entwicklung, nie auf der Live-Seite): [`src/data/projects.ts`](src/data/projects.ts)
 - Live-Daten aus SharePoint/Excel (CSV): [`src/config/dataSource.ts`](src/config/dataSource.ts) — dort steht die komplette Anleitung inkl. benötigter Spaltennamen.
 
 ## Deployment

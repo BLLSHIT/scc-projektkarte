@@ -130,15 +130,20 @@ function rowToProject(row: Record<string, string>, index: number): Project | nul
   };
 }
 
+/** Platzhalterdaten nur in der lokalen Entwicklung — auf der Live-Seite dürfen
+ * die Dummy-Projekte nie erscheinen, dort bleibt die Liste ohne CSV leer. */
+const OFFLINE_PROJECTS: Project[] = import.meta.env.DEV ? fallbackProjects : [];
+
 /**
- * Lädt Projektdaten aus der in dataSource.ts konfigurierten SharePoint-CSV.
- * Ist keine URL hinterlegt oder schlägt der Abruf/das Parsen fehl, wird
- * automatisch auf die lokalen Platzhalterdaten (src/data/projects.ts)
- * zurückgefallen — die Karte bleibt so immer funktionsfähig.
+ * Lädt Projektdaten aus der in dataSource.ts konfigurierten CSV-Quelle.
+ * Während des Ladens ist die Projektliste leer. Schlägt der Abruf/das Parsen
+ * fehl, bleibt sie auf der Live-Seite leer und `error` ist gesetzt (die
+ * Komponenten zeigen dann einen Hinweis); nur in der lokalen Entwicklung wird
+ * auf die Platzhalterdaten (src/data/projects.ts) zurückgefallen.
  */
 export function useProjects(): ProjectsState {
   const [state, setState] = useState<ProjectsState>({
-    projects: fallbackProjects,
+    projects: PROJECTS_CSV_URL ? [] : OFFLINE_PROJECTS,
     source: "fallback",
     loading: Boolean(PROJECTS_CSV_URL),
     error: null,
@@ -172,10 +177,10 @@ export function useProjects(): ProjectsState {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);
         console.warn(
-          `[useProjects] Projekt-CSV konnte nicht geladen werden (${message}) — verwende Platzhalterdaten.`,
+          `[useProjects] Projekt-CSV konnte nicht geladen werden (${message}).`,
         );
         setState({
-          projects: fallbackProjects,
+          projects: OFFLINE_PROJECTS,
           source: "fallback",
           loading: false,
           error: message,

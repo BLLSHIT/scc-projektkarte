@@ -38,7 +38,7 @@ function withPinnedFirstRow(projects: Project[]): Project[] {
 }
 
 export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {}) {
-  const { projects } = useProjects();
+  const { projects, loading, error } = useProjects();
   const [search, setSearch] = useState("");
   const [courtType, setCourtType] = useState(ALL);
   const [courtBrand, setCourtBrand] = useState(ALL);
@@ -117,6 +117,10 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
     setIndoorOutdoor(ALL);
     setYear(ALL);
   };
+
+  // Ladefehler ohne Daten: Den Hinweis zeigt die Karte, eine leere Liste mit
+  // Filtern wäre hier nur irreführend.
+  if (error && projects.length === 0) return null;
 
   return (
     <section
@@ -199,12 +203,16 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
         ) : null}
       </div>
 
-      <p className={styles.resultCount} aria-live="polite">
-        {filtered.length} von {projects.length} Projekten
-      </p>
+      {loading ? null : (
+        <p className={styles.resultCount} aria-live="polite">
+          {filtered.length} von {projects.length} Projekten
+        </p>
+      )}
 
       {filtered.length === 0 ? (
-        <p className={styles.empty}>Keine Projekte gefunden.</p>
+        <p className={styles.empty}>
+          {loading ? "Projekte werden geladen …" : "Keine Projekte gefunden."}
+        </p>
       ) : (
         <ul className={styles.grid}>
           {filtered.slice(0, visibleCount).map((project) => {

@@ -12,8 +12,9 @@
  * Diese Datei ist der Fallback/Platzhalter-Datensatz. Im Live-Betrieb können
  * Projekte stattdessen aus einer SharePoint-/Excel-CSV-Quelle geladen werden —
  * siehe src/config/dataSource.ts und src/data/useProjects.ts. Ist dort keine
- * CSV-URL hinterlegt oder schlägt der Abruf fehl, wird automatisch auf die
- * Daten hier zurückgefallen.
+ * CSV-URL hinterlegt oder schlägt der Abruf fehl, wird NUR in der lokalen
+ * Entwicklung auf die Daten hier zurückgefallen — auf der Live-Seite
+ * erscheinen sie nie.
  */
 
 // BASE_URL-relativ, damit Platzhalter-Logopfade auch unter einem

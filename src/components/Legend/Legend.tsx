@@ -1,4 +1,5 @@
 import { useProjects } from "../../data/useProjects";
+import { resolveCourtCount } from "../../utils/parseCourtBreakdown";
 import { AFP_LOGO_URL } from "../BrandBadge/resolveBrand";
 import styles from "./Legend.module.css";
 
@@ -10,7 +11,10 @@ import styles from "./Legend.module.css";
 export function Legend() {
   const { projects, loading } = useProjects();
   // Summe über alle Projekte — Pop-Up-Tour-Courts zählen bewusst mit.
-  const totalCourts = projects.reduce((sum, project) => sum + (project.courts ?? 0), 0);
+  const totalCourts = projects.reduce(
+    (sum, project) => sum + resolveCourtCount(project.courts, project.courtType),
+    0,
+  );
 
   return (
     <div className={styles.legend}>

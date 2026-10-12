@@ -243,7 +243,7 @@ function MapContent({
 }
 
 export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) {
-  const { projects } = useProjects();
+  const { projects, error } = useProjects();
   const hoverCapable = useHoverCapable();
   const isMobileViewport = useIsMobileViewport();
   const [ready, setReady] = useState(false);
@@ -292,6 +292,12 @@ export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) 
           />
         </MapContainer>
       </div>
+
+      {error && projects.length === 0 ? (
+        <p className={styles.loadError} role="status">
+          Die Projekte können gerade nicht geladen werden. Bitte versuchen Sie es später erneut.
+        </p>
+      ) : null}
 
       {isMobileViewport && dockedProject ? (
         <ProjectCard

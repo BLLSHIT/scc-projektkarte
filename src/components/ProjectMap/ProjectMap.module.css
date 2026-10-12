@@ -62,3 +62,10 @@
     transition: none;
   }
 }
+
+.loadError {
+  margin: 16px auto 0;
+  text-align: center;
+  color: #5c6b62;
+  font-size: 0.95rem;
+}
