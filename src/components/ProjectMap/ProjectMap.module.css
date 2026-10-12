@@ -102,6 +102,22 @@
   outline-offset: 2px;
 }
 
+/* Mobile Ansicht: Zoom-Knöpfe und Umschalter als 44-px-Tippflächen
+   (empfohlene Mindestgröße für Touch-Bedienung). */
+@media (max-width: 640px) {
+  .themeToggle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mapWrapper :global(.leaflet-control-zoom a) {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    font-size: 24px;
+  }
+}
+
 .loadError {
   margin: 16px auto 0;
   text-align: center;
