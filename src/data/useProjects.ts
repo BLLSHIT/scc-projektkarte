@@ -134,6 +134,36 @@ function rowToProject(row: Record<string, string>, index: number): Project | nul
  * die Dummy-Projekte nie erscheinen, dort bleibt die Liste ohne CSV leer. */
 const OFFLINE_PROJECTS: Project[] = import.meta.env.DEV ? fallbackProjects : [];
 
+/** Ein gemeinsamer Abruf für alle Komponenten (Karte, Liste, Legende) — die
+ * CSV wird pro Seitenaufruf nur einmal geladen und alle zeigen denselben Stand. */
+let sharedLoad: Promise<ProjectsState> | null = null;
+
+function loadProjects(): Promise<ProjectsState> {
+  sharedLoad ??= fetch(PROJECTS_CSV_URL)
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    })
+    .then((text): ProjectsState => {
+      const parsed = parseCsv(text)
+        .map((row, index) => rowToProject(row, index))
+        .filter((project): project is Project => project !== null)
+        .filter((project) => project.live);
+
+      if (parsed.length === 0) {
+        throw new Error("CSV enthielt keine gültigen Projektzeilen.");
+      }
+
+      return { projects: parsed, source: "csv", loading: false, error: null };
+    })
+    .catch((err: unknown): ProjectsState => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn(`[useProjects] Projekt-CSV konnte nicht geladen werden (${message}).`);
+      return { projects: OFFLINE_PROJECTS, source: "fallback", loading: false, error: message };
+    });
+  return sharedLoad;
+}
+
 /**
  * Lädt Projektdaten aus der in dataSource.ts konfigurierten CSV-Quelle.
  * Während des Ladens ist die Projektliste leer. Schlägt der Abruf/das Parsen
@@ -154,38 +184,9 @@ export function useProjects(): ProjectsState {
 
     let cancelled = false;
 
-    fetch(PROJECTS_CSV_URL)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.text();
-      })
-      .then((text) => {
-        if (cancelled) return;
-        const rows = parseCsv(text);
-        const parsed = rows
-          .map((row, index) => rowToProject(row, index))
-          .filter((project): project is Project => project !== null)
-          .filter((project) => project.live);
-
-        if (parsed.length === 0) {
-          throw new Error("CSV enthielt keine gültigen Projektzeilen.");
-        }
-
-        setState({ projects: parsed, source: "csv", loading: false, error: null });
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        const message = err instanceof Error ? err.message : String(err);
-        console.warn(
-          `[useProjects] Projekt-CSV konnte nicht geladen werden (${message}).`,
-        );
-        setState({
-          projects: OFFLINE_PROJECTS,
-          source: "fallback",
-          loading: false,
-          error: message,
-        });
-      });
+    void loadProjects().then((next) => {
+      if (!cancelled) setState(next);
+    });
 
     return () => {
       cancelled = true;

@@ -43,34 +43,50 @@ export function ProjectCard({
     null,
   );
 
+  // Einzelwerte statt der Objekte als Abhängigkeiten: `anchor` und
+  // `containerSize` können bei jedem Render neue Objekte mit gleichen Werten
+  // sein — die Position soll nur neu berechnet werden, wenn sich Werte ändern.
+  const anchorX = anchor?.x;
+  const anchorY = anchor?.y;
+  const containerWidth = containerSize?.width;
+  const containerHeight = containerSize?.height;
+
   useLayoutEffect(() => {
-    if (!isFloating || !anchor || !containerSize) return;
+    if (
+      !isFloating ||
+      anchorX == null ||
+      anchorY == null ||
+      containerWidth == null ||
+      containerHeight == null
+    ) {
+      return;
+    }
     const el = ref.current;
     if (!el) return;
 
     const { width: cw, height: ch } = el.getBoundingClientRect();
-    const spaceAbove = anchor.y - MARGIN;
-    const spaceBelow = containerSize.height - anchor.y - MARGIN;
+    const spaceAbove = anchorY - MARGIN;
+    const spaceBelow = containerHeight - anchorY - MARGIN;
 
     let top: number;
     if (spaceAbove >= ch + GAP || spaceAbove >= spaceBelow) {
-      top = anchor.y - GAP - ch;
+      top = anchorY - GAP - ch;
     } else {
-      top = anchor.y + GAP;
+      top = anchorY + GAP;
     }
     top = Math.min(
       Math.max(top, MARGIN),
-      Math.max(containerSize.height - ch - MARGIN, MARGIN),
+      Math.max(containerHeight - ch - MARGIN, MARGIN),
     );
 
-    let left = anchor.x - cw / 2;
+    let left = anchorX - cw / 2;
     left = Math.min(
       Math.max(left, MARGIN),
-      Math.max(containerSize.width - cw - MARGIN, MARGIN),
+      Math.max(containerWidth - cw - MARGIN, MARGIN),
     );
 
     setStyle({ left, top });
-  }, [isFloating, anchor?.x, anchor?.y, containerSize?.width, containerSize?.height, project.id]);
+  }, [isFloating, anchorX, anchorY, containerWidth, containerHeight, project.id]);
 
   const brandDisplay = resolveBrandDisplay(project);
 

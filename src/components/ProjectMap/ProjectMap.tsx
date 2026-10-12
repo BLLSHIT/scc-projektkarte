@@ -9,6 +9,8 @@ import { useHoverCapable } from "../../hooks/useHoverCapable";
 import { useIsMobileViewport } from "../../hooks/useIsMobileViewport";
 import { ProjectMarker } from "./ProjectMarker";
 import { ProjectCard } from "./ProjectCard";
+import { useProjectAutoplay } from "./useProjectAutoplay";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 import "./markers.css";
 import styles from "./ProjectMap.module.css";
 
@@ -38,6 +40,18 @@ function MapContent({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [containerSize, setContainerSize] = useState<Size>({ width: 0, height: 0 });
   const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null);
+
+  // Automatischer Durchlauf, solange der Besucher nichts ausgewählt hat. Nur
+  // mit schwebender Projektkarte: In der mobilen Ansicht steht die Karte
+  // unterhalb der Map und würde bei jedem Wechsel den Seiteninhalt verschieben.
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const { isAutoShown, claimForUser } = useProjectAutoplay({
+    enabled: !isMobileViewport && !reducedMotion,
+    projects,
+    map,
+    activeId,
+    setActiveId,
+  });
 
   // Hover-Intent: Schließen bei mouseleave leicht verzögern und abbrechen
   // können, damit man die Maus vom Marker in die Projektkarte bewegen kann
@@ -69,27 +83,30 @@ function MapContent({
     (id: string) => {
       clearCloseTimer();
       clearOpenTimer();
+      claimForUser();
       setActiveId(id);
     },
-    [clearCloseTimer, clearOpenTimer],
+    [clearCloseTimer, clearOpenTimer, claimForUser],
   );
   const scheduleOpen = useCallback(
     (id: string) => {
       clearCloseTimer();
       clearOpenTimer();
       openTimerRef.current = window.setTimeout(() => {
+        claimForUser();
         setActiveId(id);
       }, 150);
     },
-    [clearCloseTimer, clearOpenTimer],
+    [clearCloseTimer, clearOpenTimer, claimForUser],
   );
   const closeProjectImmediate = useCallback(
     (id: string) => {
       clearCloseTimer();
       clearOpenTimer();
+      claimForUser();
       setActiveId((prev) => (prev === id ? null : prev));
     },
-    [clearCloseTimer, clearOpenTimer],
+    [clearCloseTimer, clearOpenTimer, claimForUser],
   );
   const scheduleClose = useCallback(
     (id: string) => {
@@ -104,8 +121,9 @@ function MapContent({
   const closeAll = useCallback(() => {
     clearCloseTimer();
     clearOpenTimer();
+    claimForUser();
     setActiveId(null);
-  }, [clearCloseTimer, clearOpenTimer]);
+  }, [clearCloseTimer, clearOpenTimer, claimForUser]);
   const registerElement = useCallback((id: string, el: HTMLElement | null) => {
     if (el) markerElsRef.current.set(id, el);
     else markerElsRef.current.delete(id);
@@ -187,14 +205,19 @@ function MapContent({
       if (event.key === "Escape") {
         const markerEl = markerElsRef.current.get(activeId);
         closeAll();
-        markerEl?.focus();
+        // Beim automatischen Durchlauf den Fokus nicht an die Karte ziehen.
+        if (!isAutoShown) markerEl?.focus();
       }
     };
+    // Eine vom Durchlauf geöffnete Karte reagiert nicht auf Klicks/Fokus
+    // anderswo auf der Seite; ein Klick in die Karte übergibt sie dem Besucher.
     const handlePointerDown = (event: PointerEvent) => {
-      if (!isInside(event.target)) closeAll();
+      if (isInside(event.target)) claimForUser();
+      else if (!isAutoShown) closeAll();
     };
     const handleFocusIn = (event: FocusEvent) => {
-      if (!isInside(event.target)) closeAll();
+      if (isInside(event.target)) claimForUser();
+      else if (!isAutoShown) closeAll();
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -205,7 +228,7 @@ function MapContent({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("focusin", handleFocusIn);
     };
-  }, [activeId, closeAll]);
+  }, [activeId, closeAll, isAutoShown, claimForUser]);
 
   return (
     <>
@@ -231,7 +254,14 @@ function MapContent({
           anchor={anchor}
           containerSize={containerSize}
           onClose={closeAll}
-          onMouseEnter={hoverCapable ? clearCloseTimer : undefined}
+          onMouseEnter={
+            hoverCapable
+              ? () => {
+                  clearCloseTimer();
+                  claimForUser();
+                }
+              : undefined
+          }
           onMouseLeave={
             hoverCapable ? () => scheduleClose(activeProject.id) : undefined
           }
