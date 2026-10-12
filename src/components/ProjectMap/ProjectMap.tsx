@@ -21,29 +21,32 @@ const VectorMap = lazy(() => import("./VectorMap").then((m) => ({ default: m.Vec
 
 const THEME_STORAGE_KEY = "scc-karte-theme";
 
-/** Helle oder dunkle Karte; die Wahl des Besuchers wird im Browser gemerkt. */
+/**
+ * Helle oder dunkle Karte. Ohne eigene Wahl folgt sie der Systemeinstellung
+ * des Besuchers (auch bei späterem Wechsel); sobald er den Umschalter nutzt,
+ * gilt seine Wahl und wird im Browser gemerkt.
+ */
 function useMapTheme(): [MapTheme, () => void] {
-  const [theme, setTheme] = useState<MapTheme>(() => {
+  const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const [choice, setChoice] = useState<MapTheme | null>(() => {
     try {
-      return window.localStorage.getItem(THEME_STORAGE_KEY) === "leuchtkarte"
-        ? "leuchtkarte"
-        : "evolution";
+      const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+      return stored === "leuchtkarte" || stored === "evolution" ? stored : null;
     } catch {
-      // Browser-Speicher gesperrt (z. B. privates Fenster) — helle Karte.
-      return "evolution";
+      // Browser-Speicher gesperrt (z. B. privates Fenster) — Systemeinstellung.
+      return null;
     }
   });
+  const theme: MapTheme = choice ?? (systemDark ? "leuchtkarte" : "evolution");
   const toggleTheme = useCallback(() => {
-    setTheme((current) => {
-      const next = current === "leuchtkarte" ? "evolution" : "leuchtkarte";
-      try {
-        window.localStorage.setItem(THEME_STORAGE_KEY, next);
-      } catch {
-        // Ohne Speicher gilt die Wahl nur für diesen Seitenaufruf.
-      }
-      return next;
-    });
-  }, []);
+    const next: MapTheme = theme === "leuchtkarte" ? "evolution" : "leuchtkarte";
+    setChoice(next);
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch {
+      // Ohne Speicher gilt die Wahl nur für diesen Seitenaufruf.
+    }
+  }, [theme]);
   return [theme, toggleTheme];
 }
 import styles from "./ProjectMap.module.css";
