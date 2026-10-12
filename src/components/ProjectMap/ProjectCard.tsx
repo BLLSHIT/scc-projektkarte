@@ -30,6 +30,8 @@ type ProjectCardProps = {
 
 const MARGIN = 12;
 const GAP = 16;
+/** Seitlicher Abstand zum Marker — lässt Platz für dessen Pulsring. */
+const SIDE_GAP = 28;
 
 export function ProjectCard({
   project,
@@ -71,25 +73,31 @@ export function ProjectCard({
     if (!el) return;
 
     const { width: cw, height: ch } = el.getBoundingClientRect();
-    const spaceAbove = anchorY - MARGIN;
-    const spaceBelow = containerHeight - anchorY - MARGIN;
+    const clampLeft = (value: number) =>
+      Math.min(Math.max(value, MARGIN), Math.max(containerWidth - cw - MARGIN, MARGIN));
+    const clampTop = (value: number) =>
+      Math.min(Math.max(value, MARGIN), Math.max(containerHeight - ch - MARGIN, MARGIN));
 
+    const fitsLeft = anchorX - SIDE_GAP - cw >= MARGIN;
+    const fitsRight = anchorX + SIDE_GAP + cw <= containerWidth - MARGIN;
+
+    let left: number;
     let top: number;
-    if (spaceAbove >= ch + GAP || spaceAbove >= spaceBelow) {
-      top = anchorY - GAP - ch;
+    if (fitsLeft || fitsRight) {
+      // Seitlich neben dem Marker, vertikal auf ihn zentriert — die Karte ist
+      // meist höher als der Platz über/unter dem Marker und würde ihn sonst
+      // verdecken. Links bevorzugt: Dort lässt die Ausgangsansicht Platz frei.
+      left = fitsLeft ? anchorX - SIDE_GAP - cw : anchorX + SIDE_GAP;
+      top = clampTop(anchorY - ch / 2);
     } else {
-      top = anchorY + GAP;
+      // Seitlich kein Platz (z. B. schmale Karte): darüber oder darunter.
+      const spaceAbove = anchorY - MARGIN;
+      const spaceBelow = containerHeight - anchorY - MARGIN;
+      top = clampTop(
+        spaceAbove >= ch + GAP || spaceAbove >= spaceBelow ? anchorY - GAP - ch : anchorY + GAP,
+      );
+      left = clampLeft(anchorX - cw / 2);
     }
-    top = Math.min(
-      Math.max(top, MARGIN),
-      Math.max(containerHeight - ch - MARGIN, MARGIN),
-    );
-
-    let left = anchorX - cw / 2;
-    left = Math.min(
-      Math.max(left, MARGIN),
-      Math.max(containerWidth - cw - MARGIN, MARGIN),
-    );
 
     setStyle({ left, top });
   }, [isFloating, anchorX, anchorY, containerWidth, containerHeight, project.id]);

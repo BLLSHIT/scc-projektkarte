@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, useMap } from "react-leaflet";
 import type { Project } from "../../data/projects";
 import { useProjects } from "../../data/useProjects";
-import { MAP_PIXEL_BOUNDS, type MapTheme } from "../../config/mapConfig";
+import { MAP_PIXEL_BOUNDS, projectToMapPoint, type MapTheme } from "../../config/mapConfig";
 import { useHoverCapable } from "../../hooks/useHoverCapable";
 import { useIsMobileViewport } from "../../hooks/useIsMobileViewport";
 import { ProjectMarker } from "./ProjectMarker";
@@ -242,10 +242,10 @@ function MapContent({
       return;
     }
     const updateAnchor = () => {
-      const point = map.latLngToContainerPoint([
-        activeProject.latitude,
-        activeProject.longitude,
-      ]);
+      // Über die Kartenprojektion umrechnen — dieselbe Position wie der Marker.
+      const point = map.latLngToContainerPoint(
+        projectToMapPoint(activeProject.latitude, activeProject.longitude),
+      );
       setAnchor({ x: point.x, y: point.y });
     };
     updateAnchor();
