@@ -23,6 +23,11 @@
   flex-shrink: 0;
 }
 
+.totalNumber {
+  color: #036147;
+  font-weight: 700;
+}
+
 .legendLogoWrap {
   display: flex;
   align-items: center;
