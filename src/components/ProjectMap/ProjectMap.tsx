@@ -75,7 +75,7 @@ function MapContent({
   const markerElsRef = useRef(new Map<string, HTMLElement>());
   const [activeId, setActiveId] = useState<string | null>(null);
   const [containerSize, setContainerSize] = useState<Size>({ width: 0, height: 0 });
-  const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null);
+  const [anchor, setAnchor] = useState<{ x: number; y: number; clearX: number } | null>(null);
 
   // Automatischer Durchlauf, solange der Besucher nichts ausgewählt hat. Nur
   // mit schwebender Projektkarte: In der mobilen Ansicht steht die Karte
@@ -246,14 +246,26 @@ function MapContent({
       const point = map.latLngToContainerPoint(
         projectToMapPoint(activeProject.latitude, activeProject.longitude),
       );
-      setAnchor({ x: point.x, y: point.y });
+      // Westlichster sichtbarer Marker: Links davon ist Platz für die
+      // Projektkarte, ohne dass sie Pins verdeckt.
+      const size = map.getSize();
+      let clearX = point.x;
+      for (const project of projects) {
+        const p = map.latLngToContainerPoint(
+          projectToMapPoint(project.latitude, project.longitude),
+        );
+        if (p.x >= 0 && p.x <= size.x && p.y >= 0 && p.y <= size.y) {
+          clearX = Math.min(clearX, p.x);
+        }
+      }
+      setAnchor({ x: point.x, y: point.y, clearX });
     };
     updateAnchor();
     map.on("move zoom", updateAnchor);
     return () => {
       map.off("move zoom", updateAnchor);
     };
-  }, [activeProject, containerSize, map]);
+  }, [activeProject, containerSize, map, projects]);
 
   // Escape schließt + Fokus zurück zum Marker; Klick/Fokus außerhalb schließt ebenfalls.
   useEffect(() => {
@@ -318,6 +330,7 @@ function MapContent({
           project={activeProject}
           variant="floating"
           anchor={anchor}
+          clearX={anchor.clearX}
           containerSize={containerSize}
           onClose={closeAll}
           onMouseEnter={

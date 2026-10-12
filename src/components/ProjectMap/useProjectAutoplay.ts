@@ -15,6 +15,8 @@ const GAP_MS = 1500;
 const RESUME_DELAY_MS = 5000;
 /** Erneuter Versuch, wenn gerade kein Marker im Kartenausschnitt liegt. */
 const RETRY_MS = 2000;
+/** So lange wartet der Durchlauf höchstens zusätzlich auf das Bild des nächsten Projekts. */
+const IMAGE_WAIT_MS = 2500;
 
 function shuffled<T>(items: T[]): T[] {
   const result = [...items];
@@ -56,6 +58,8 @@ export function useProjectAutoplay({
   const [retry, setRetry] = useState(0);
   const queueRef = useRef<string[]>([]);
   const lastIdRef = useRef<string | null>(null);
+  // Bereits ausgewähltes, aber noch nicht gezeigtes nächstes Projekt.
+  const pendingIdRef = useRef<string | null>(null);
   const nextDelayRef = useRef(START_DELAY_MS);
 
   const isAutoShown = activeId != null && activeId === autoId;
@@ -110,9 +114,9 @@ export function useProjectAutoplay({
       return null;
     };
 
-    const timer = window.setTimeout(
-      () => {
-        if (isAutoShown) {
+    if (isAutoShown) {
+      const timer = window.setTimeout(
+        () => {
           // Erst ausblenden, dann schließen.
           if (!leaving) {
             setLeaving(true);
@@ -122,20 +126,54 @@ export function useProjectAutoplay({
           setLeaving(false);
           setAutoId(null);
           setActiveId(null);
-          return;
-        }
-        const next = pickNext();
-        if (next) {
-          setAutoId(next);
-          setActiveId(next);
-        } else {
-          nextDelayRef.current = RETRY_MS;
-          setRetry((n) => n + 1);
-        }
-      },
-      isAutoShown ? (leaving ? FADE_OUT_MS : DWELL_MS) : nextDelayRef.current,
-    );
-    return () => window.clearTimeout(timer);
+        },
+        leaving ? FADE_OUT_MS : DWELL_MS,
+      );
+      return () => window.clearTimeout(timer);
+    }
+
+    // Das nächste Projekt schon zu Beginn der Pause auswählen und sein Bild
+    // vorab laden, damit die Projektkarte gleich mit Bild erscheint.
+    const next = pendingIdRef.current ?? pickNext();
+    pendingIdRef.current = next;
+    if (!next) {
+      const timer = window.setTimeout(() => setRetry((n) => n + 1), RETRY_MS);
+      return () => window.clearTimeout(timer);
+    }
+
+    const imageUrl = projects.find((p) => p.id === next)?.image;
+    const preload = imageUrl ? new Image() : null;
+    if (preload && imageUrl) preload.src = imageUrl;
+
+    let done = false;
+    let waitTimer = 0;
+    const show = () => {
+      if (done) return;
+      done = true;
+      pendingIdRef.current = null;
+      setAutoId(next);
+      setActiveId(next);
+    };
+    const timer = window.setTimeout(() => {
+      if (!preload || preload.complete) {
+        show();
+        return;
+      }
+      // Bild noch unterwegs: kurz darauf warten, aber nicht unbegrenzt.
+      preload.onload = show;
+      preload.onerror = show;
+      waitTimer = window.setTimeout(show, IMAGE_WAIT_MS);
+    }, nextDelayRef.current);
+
+    return () => {
+      done = true;
+      window.clearTimeout(timer);
+      window.clearTimeout(waitTimer);
+      if (preload) {
+        preload.onload = null;
+        preload.onerror = null;
+      }
+    };
   }, [enabled, inView, projects, map, activeId, isAutoShown, leaving, retry, setActiveId]);
 
   return { isAutoShown, isAutoLeaving: isAutoShown && leaving, claimForUser };

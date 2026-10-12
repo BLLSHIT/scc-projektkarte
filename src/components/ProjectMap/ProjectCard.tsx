@@ -16,6 +16,9 @@ type ProjectCardProps = {
   variant?: "floating" | "docked";
   /** Marker-Position in Pixelkoordinaten relativ zum Kartencontainer. Nur bei variant="floating" nötig. */
   anchor?: Point;
+  /** x-Position des westlichsten sichtbaren Markers — links davon verdeckt die
+   *  Projektkarte keinen Pin. Nur bei variant="floating". */
+  clearX?: number;
   /** Größe des Kartencontainers, um Überlauf am Rand zu verhindern. Nur bei variant="floating" nötig. */
   containerSize?: Size;
   onClose: () => void;
@@ -32,11 +35,15 @@ const MARGIN = 12;
 const GAP = 16;
 /** Seitlicher Abstand zum Marker — lässt Platz für dessen Pulsring. */
 const SIDE_GAP = 28;
+/** Abstand der Projektkarte zum westlichsten Marker, wenn sie in der freien
+ *  Spalte links steht — deutlich Luft, damit kein Pin bedrängt wird. */
+const CLEAR_GAP = 64;
 
 export function ProjectCard({
   project,
   variant = "floating",
   anchor,
+  clearX,
   containerSize,
   onClose,
   onMouseEnter,
@@ -78,15 +85,21 @@ export function ProjectCard({
     const clampTop = (value: number) =>
       Math.min(Math.max(value, MARGIN), Math.max(containerHeight - ch - MARGIN, MARGIN));
 
+    // Freie Spalte links neben allen sichtbaren Markern (falls bekannt).
+    const clearLeft = (clearX ?? anchorX) - CLEAR_GAP - cw;
     const fitsLeft = anchorX - SIDE_GAP - cw >= MARGIN;
     const fitsRight = anchorX + SIDE_GAP + cw <= containerWidth - MARGIN;
 
     let left: number;
     let top: number;
-    if (fitsLeft || fitsRight) {
-      // Seitlich neben dem Marker, vertikal auf ihn zentriert — die Karte ist
-      // meist höher als der Platz über/unter dem Marker und würde ihn sonst
-      // verdecken. Links bevorzugt: Dort lässt die Ausgangsansicht Platz frei.
+    if (clearLeft >= MARGIN) {
+      // Bevorzugt: links neben dem westlichsten Marker, auf Höhe des aktiven
+      // Markers — so verdeckt die Projektkarte keinen Pin.
+      left = clearLeft;
+      top = clampTop(anchorY - ch / 2);
+    } else if (fitsLeft || fitsRight) {
+      // Kein freier Streifen (z. B. hineingezoomt): direkt neben dem Marker,
+      // vertikal auf ihn zentriert, damit zumindest er selbst frei bleibt.
       left = fitsLeft ? anchorX - SIDE_GAP - cw : anchorX + SIDE_GAP;
       top = clampTop(anchorY - ch / 2);
     } else {
@@ -100,7 +113,7 @@ export function ProjectCard({
     }
 
     setStyle({ left, top });
-  }, [isFloating, anchorX, anchorY, containerWidth, containerHeight, project.id]);
+  }, [isFloating, anchorX, anchorY, clearX, containerWidth, containerHeight, project.id]);
 
   const brandDisplay = resolveBrandDisplay(project);
 
@@ -144,7 +157,7 @@ export function ProjectCard({
       </button>
 
       {project.image ? (
-        <img className={styles.image} src={project.image} alt="" loading="lazy" />
+        <img className={styles.image} src={project.image} alt="" />
       ) : null}
 
       <div className={styles.nameRow}>
