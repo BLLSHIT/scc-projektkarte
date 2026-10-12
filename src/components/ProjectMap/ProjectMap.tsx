@@ -391,7 +391,7 @@ export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) 
           whenReady={() => setReady(true)}
         >
           <Suspense fallback={null}>
-            <VectorMap />
+            <VectorMap highlight={dockedProject} />
           </Suspense>
           <MapContent
             projects={projects}

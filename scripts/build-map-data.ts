@@ -197,7 +197,12 @@ const geometry = {
   austria: toPath(countries.filter((f) => codeOf(f) === "AUT"), FINE),
   switzerland: toPath(countries.filter((f) => codeOf(f) === "CHE"), FINE),
   neighbors: toPath(countries.filter((f) => !DACH.includes(codeOf(f))), COARSE),
-  states: toPath(states.filter((f) => codeOf(f) === "DEU"), FINE),
+  // Bundesländer einzeln, damit die Karte das Land des aktiven Projekts hervorheben kann.
+  states: states
+    .filter((f) => codeOf(f) === "DEU")
+    .map((f) => ({ name: String(f.properties.name ?? ""), d: toPath([f], FINE) }))
+    .filter((state) => state.d !== "")
+    .sort((a, b) => a.name.localeCompare(b.name, "de")),
 };
 
 const outFile = join(dirname(fileURLToPath(import.meta.url)), "../src/data/mapGeometry.ts");
@@ -210,7 +215,9 @@ await writeFile(
     `export const MAP_GEOMETRY = {\n${lines.join("\n")}\n} as const;\n`,
 );
 
-for (const [key, d] of Object.entries(geometry)) {
-  console.log(`${key}: ${(d.length / 1024).toFixed(1)} kB, ${d.split("M").length - 1} Flächen`);
+for (const [key, value] of Object.entries(geometry)) {
+  const text = JSON.stringify(value);
+  const rings = text.match(/M[-\d]/g)?.length ?? 0;
+  console.log(`${key}: ${(text.length / 1024).toFixed(1)} kB, ${rings} Flächen`);
 }
 console.log(`Geschrieben: ${outFile}`);

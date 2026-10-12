@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { point } from "leaflet";
 import type { FitBoundsOptions, LatLngBoundsExpression, Map as LeafletMap } from "leaflet";
 import { HOME_GEO_BOUNDS, projectToMapPoint } from "../../config/mapConfig";
 
@@ -21,9 +22,16 @@ const HOME_BOUNDS: LatLngBoundsExpression = [
 ];
 
 /** Auf breiten Karten bleibt links Platz für die schwebende Projektkarte. */
+const homeLeftPadding = (map: LeafletMap) => (map.getSize().x > 760 ? 320 : 24);
+
 function homeViewOptions(map: LeafletMap): FitBoundsOptions {
-  const left = map.getSize().x > 760 ? 320 : 24;
-  return { paddingTopLeft: [left, 28], paddingBottomRight: [24, 28] };
+  return { paddingTopLeft: [homeLeftPadding(map), 28], paddingBottomRight: [24, 28] };
+}
+
+/** Maßstab der Ausgangsansicht in Bildschirmpixeln je Karteneinheit. */
+export function homeViewScale(map: LeafletMap): number {
+  const zoom = map.getBoundsZoom(HOME_BOUNDS, false, point(homeLeftPadding(map) + 24, 56));
+  return map.getZoomScale(zoom, 0);
 }
 
 /** Ausgangsansicht nach dem Einstieg: Deutschland formatfüllend, ohne Animation. */
