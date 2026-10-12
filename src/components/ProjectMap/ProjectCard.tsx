@@ -35,9 +35,6 @@ const MARGIN = 12;
 const GAP = 16;
 /** Seitlicher Abstand zum Marker — lässt Platz für dessen Pulsring. */
 const SIDE_GAP = 28;
-/** Abstand der Projektkarte zum westlichsten Marker, wenn sie in der freien
- *  Spalte links steht — deutlich Luft, damit kein Pin bedrängt wird. */
-const CLEAR_GAP = 64;
 
 export function ProjectCard({
   project,
@@ -85,17 +82,20 @@ export function ProjectCard({
     const clampTop = (value: number) =>
       Math.min(Math.max(value, MARGIN), Math.max(containerHeight - ch - MARGIN, MARGIN));
 
-    // Freie Spalte links neben allen sichtbaren Markern (falls bekannt).
-    const clearLeft = (clearX ?? anchorX) - CLEAR_GAP - cw;
+    // Freier Bereich zwischen linkem Kartenrand und dem westlichsten sichtbaren
+    // Marker (falls bekannt): Die Projektkarte steht darin waagerecht mittig.
+    const freeWidth = clearX ?? anchorX;
+    const centeredLeft = Math.max((freeWidth - cw) / 2, MARGIN);
+    const fitsFreeArea = centeredLeft + cw <= freeWidth - SIDE_GAP;
     const fitsLeft = anchorX - SIDE_GAP - cw >= MARGIN;
     const fitsRight = anchorX + SIDE_GAP + cw <= containerWidth - MARGIN;
 
     let left: number;
     let top: number;
-    if (clearLeft >= MARGIN) {
-      // Bevorzugt: links neben dem westlichsten Marker, auf Höhe des aktiven
+    if (fitsFreeArea) {
+      // Bevorzugt: mittig im freien Bereich links, auf Höhe des aktiven
       // Markers — so verdeckt die Projektkarte keinen Pin.
-      left = clearLeft;
+      left = centeredLeft;
       top = clampTop(anchorY - ch / 2);
     } else if (fitsLeft || fitsRight) {
       // Kein freier Streifen (z. B. hineingezoomt): direkt neben dem Marker,
