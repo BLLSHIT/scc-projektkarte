@@ -45,13 +45,19 @@ function MapContent({
   // mit schwebender Projektkarte: In der mobilen Ansicht steht die Karte
   // unterhalb der Map und würde bei jedem Wechsel den Seiteninhalt verschieben.
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
-  const { isAutoShown, claimForUser } = useProjectAutoplay({
+  const { isAutoShown, isAutoLeaving, claimForUser } = useProjectAutoplay({
     enabled: !isMobileViewport && !reducedMotion,
     projects,
     map,
     activeId,
     setActiveId,
   });
+  // Ruhigere Marker-Übergänge, solange der Besucher nichts ausgewählt hat
+  // (siehe ".scc-map--autoplay" in markers.css).
+  const userHasSelection = activeId != null && !isAutoShown;
+  useEffect(() => {
+    map.getContainer().classList.toggle("scc-map--autoplay", !userHasSelection);
+  }, [map, userHasSelection]);
 
   // Hover-Intent: Schließen bei mouseleave leicht verzögern und abbrechen
   // können, damit man die Maus vom Marker in die Projektkarte bewegen kann
@@ -266,6 +272,8 @@ function MapContent({
             hoverCapable ? () => scheduleClose(activeProject.id) : undefined
           }
           cardId={cardIdFor(activeProject.id)}
+          calm={isAutoShown}
+          leaving={isAutoLeaving}
         />
       ) : null}
     </>

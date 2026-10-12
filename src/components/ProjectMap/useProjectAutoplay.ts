@@ -4,11 +4,13 @@ import type { Project } from "../../data/projects";
 import { projectToMapPoint } from "../../config/mapConfig";
 
 /** Wartezeit nach dem Laden, bis der Durchlauf startet (Marker-Animation abwarten). */
-const START_DELAY_MS = 2500;
+const START_DELAY_MS = 3000;
 /** Wie lange eine automatisch geöffnete Projektkarte sichtbar bleibt. */
-const DWELL_MS = 3800;
+const DWELL_MS = 6000;
+/** Dauer des Ausblendens — passend zur ".calm"-Transition der Projektkarte. */
+const FADE_OUT_MS = 700;
 /** Pause zwischen zwei Projekten. */
-const GAP_MS = 700;
+const GAP_MS = 1500;
 /** Pause, nachdem der Besucher selbst ein Projekt geöffnet/geschlossen hat. */
 const RESUME_DELAY_MS = 5000;
 /** Erneuter Versuch, wenn gerade kein Marker im Kartenausschnitt liegt. */
@@ -48,6 +50,8 @@ export function useProjectAutoplay({
 }: AutoplayOptions) {
   // ID des Projekts, das der Durchlauf (nicht der Besucher) geöffnet hat.
   const [autoId, setAutoId] = useState<string | null>(null);
+  // Die automatisch geöffnete Karte blendet gerade aus (noch im DOM).
+  const [leaving, setLeaving] = useState(false);
   const [inView, setInView] = useState(false);
   const [retry, setRetry] = useState(0);
   const queueRef = useRef<string[]>([]);
@@ -60,6 +64,7 @@ export function useProjectAutoplay({
   const claimForUser = useCallback(() => {
     nextDelayRef.current = RESUME_DELAY_MS;
     setAutoId(null);
+    setLeaving(false);
   }, []);
 
   useEffect(() => {
@@ -76,6 +81,7 @@ export function useProjectAutoplay({
       if (isAutoShown) {
         setAutoId(null);
         setActiveId(null);
+        setLeaving(false);
       }
       return;
     }
@@ -107,7 +113,13 @@ export function useProjectAutoplay({
     const timer = window.setTimeout(
       () => {
         if (isAutoShown) {
+          // Erst ausblenden, dann schließen.
+          if (!leaving) {
+            setLeaving(true);
+            return;
+          }
           nextDelayRef.current = GAP_MS;
+          setLeaving(false);
           setAutoId(null);
           setActiveId(null);
           return;
@@ -121,10 +133,10 @@ export function useProjectAutoplay({
           setRetry((n) => n + 1);
         }
       },
-      isAutoShown ? DWELL_MS : nextDelayRef.current,
+      isAutoShown ? (leaving ? FADE_OUT_MS : DWELL_MS) : nextDelayRef.current,
     );
     return () => window.clearTimeout(timer);
-  }, [enabled, inView, projects, map, activeId, isAutoShown, retry, setActiveId]);
+  }, [enabled, inView, projects, map, activeId, isAutoShown, leaving, retry, setActiveId]);
 
-  return { isAutoShown, claimForUser };
+  return { isAutoShown, isAutoLeaving: isAutoShown && leaving, claimForUser };
 }

@@ -22,6 +22,10 @@ type ProjectCardProps = {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   cardId: string;
+  /** Automatischer Durchlauf: langsamere, ruhigere Ein-/Ausblendung. */
+  calm?: boolean;
+  /** Karte blendet gerade aus (bleibt dafür noch kurz im DOM). */
+  leaving?: boolean;
 };
 
 const MARGIN = 12;
@@ -36,6 +40,8 @@ export function ProjectCard({
   onMouseEnter,
   onMouseLeave,
   cardId,
+  calm = false,
+  leaving = false,
 }: ProjectCardProps) {
   const isFloating = variant === "floating";
   const ref = useRef<HTMLDivElement>(null);
@@ -100,7 +106,7 @@ export function ProjectCard({
   const floatingStyle = isFloating
     ? (style ?? { left: anchor?.x ?? 0, top: anchor?.y ?? 0, visibility: "hidden" as const })
     : undefined;
-  const isVisible = isFloating ? Boolean(style) : true;
+  const isVisible = (isFloating ? Boolean(style) : true) && !leaving;
 
   return (
     <div
@@ -112,6 +118,7 @@ export function ProjectCard({
         styles.card,
         isFloating ? styles.floating : styles.docked,
         isVisible ? styles.visible : "",
+        calm ? styles.calm : "",
       ]
         .filter(Boolean)
         .join(" ")}

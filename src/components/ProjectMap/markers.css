@@ -48,6 +48,14 @@
     0 0 0 6px #036147;
 }
 
+/* Automatischer Durchlauf (Klasse am Kartencontainer, solange der Besucher
+   nichts ausgewählt hat): Marker ruhig hervorheben und zurücknehmen. Marker
+   unter der Maus reagieren weiterhin sofort. */
+.scc-map--autoplay .scc-marker:not(:hover) .scc-marker__dot,
+.scc-map--autoplay .scc-marker:not(:hover) .scc-marker__logo-wrap {
+  transition-duration: 0.7s;
+}
+
 /* AFP Courts Pop-Up Tour: AFP-Logo statt grünem Punkt. */
 .scc-marker__logo-wrap {
   display: flex;

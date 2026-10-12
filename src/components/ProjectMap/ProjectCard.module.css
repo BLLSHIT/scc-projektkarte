@@ -13,6 +13,11 @@
     transform 0.16s ease;
 }
 
+/* Automatischer Durchlauf: weich ein- und ausblenden statt aufploppen. */
+.calm {
+  transition-duration: 0.7s;
+}
+
 .floating {
   position: absolute;
   width: min(300px, calc(100vw - 32px));
@@ -155,6 +160,12 @@
   line-height: 1.45;
   color: #3d3d3a;
   margin: 0 0 12px;
+}
+
+/* ".card .link" statt ".link": Leaflets ".leaflet-container a" setzt sonst
+   seine eigene Linkfarbe über die weiße Schrift. */
+.card .link {
+  color: #fff;
 }
 
 .link {
