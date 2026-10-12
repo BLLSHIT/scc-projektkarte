@@ -1,7 +1,38 @@
 import { describe, expect, it } from "vitest";
+import { VECTOR_MAP_SIZE, projectLonLat } from "../src/config/mapProjection";
 import { parseCsv } from "../src/data/csv";
 import { extractLatLngFromGoogleMapsUrl } from "../src/data/googleMapsLink";
 import { parseCourtBreakdown, resolveCourtCount } from "../src/utils/parseCourtBreakdown";
+
+describe("projectLonLat", () => {
+  it("legt Mittelmeridian und Mittelbreite in die Bildmitte", () => {
+    const [x, y] = projectLonLat(10.4, 50.2);
+    expect(x).toBeCloseTo(VECTOR_MAP_SIZE.width / 2, 6);
+    expect(y).toBeCloseTo(VECTOR_MAP_SIZE.height / 2, 6);
+  });
+
+  it("zeichnet Norden oben und Osten rechts", () => {
+    const [hamburgX, hamburgY] = projectLonLat(9.99, 53.55);
+    const [munichX, munichY] = projectLonLat(11.58, 48.14);
+    expect(hamburgY).toBeLessThan(munichY);
+    expect(munichX).toBeGreaterThan(hamburgX);
+  });
+
+  it("hält den DACH-Raum innerhalb der Zeichenfläche", () => {
+    for (const [lon, lat] of [
+      [5.87, 45.8],
+      [17.17, 45.8],
+      [5.87, 55.06],
+      [17.17, 55.06],
+    ]) {
+      const [x, y] = projectLonLat(lon, lat);
+      expect(x).toBeGreaterThan(0);
+      expect(x).toBeLessThan(VECTOR_MAP_SIZE.width);
+      expect(y).toBeGreaterThan(0);
+      expect(y).toBeLessThan(VECTOR_MAP_SIZE.height);
+    }
+  });
+});
 
 describe("parseCsv", () => {
   it("liest Kopfzeile und Zeilen und entfernt Leerraum", () => {

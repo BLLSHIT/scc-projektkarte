@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { FitBoundsOptions, LatLngBoundsExpression, Map as LeafletMap } from "leaflet";
-import { projectToMapPoint } from "../../config/mapConfig";
+import { HOME_GEO_BOUNDS, projectToMapPoint } from "../../config/mapConfig";
 
 /** Klasse am Kartencontainer, solange die Marker noch nicht eingeblendet sind
  * (hält deren Erscheinen-Animation an, siehe markers.css). */
@@ -14,10 +14,10 @@ const ZOOM_DURATION_S = 2;
 const MARKERS_START_MS = 1000;
 const MARKER_APPEAR_MS = 450;
 
-/** Geografische Ausdehnung Deutschlands in Bildkoordinaten der Kartengrafik. */
-const GERMANY_BOUNDS: LatLngBoundsExpression = [
-  projectToMapPoint(47.27, 5.87),
-  projectToMapPoint(55.06, 15.04),
+/** Ausgangsansicht (Deutschland bzw. DACH-Raum) in Bildkoordinaten der Karte. */
+const HOME_BOUNDS: LatLngBoundsExpression = [
+  projectToMapPoint(HOME_GEO_BOUNDS.south, HOME_GEO_BOUNDS.west),
+  projectToMapPoint(HOME_GEO_BOUNDS.north, HOME_GEO_BOUNDS.east),
 ];
 
 /** Auf breiten Karten bleibt links Platz für die schwebende Projektkarte. */
@@ -28,7 +28,7 @@ function homeViewOptions(map: LeafletMap): FitBoundsOptions {
 
 /** Ausgangsansicht nach dem Einstieg: Deutschland formatfüllend, ohne Animation. */
 export function applyHomeView(map: LeafletMap) {
-  map.fitBounds(GERMANY_BOUNDS, { ...homeViewOptions(map), animate: false });
+  map.fitBounds(HOME_BOUNDS, { ...homeViewOptions(map), animate: false });
 }
 
 /**
@@ -59,7 +59,7 @@ export function useMapIntro(
         setIntroDone(true);
         return;
       }
-      map.flyToBounds(GERMANY_BOUNDS, {
+      map.flyToBounds(HOME_BOUNDS, {
         ...homeViewOptions(map),
         duration: ZOOM_DURATION_S,
         easeLinearity: 0.3,

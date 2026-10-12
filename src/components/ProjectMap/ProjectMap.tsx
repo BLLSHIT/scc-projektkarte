@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { ImageOverlay, MapContainer, useMap } from "react-leaflet";
+import { MapContainer, useMap } from "react-leaflet";
 import type { Project } from "../../data/projects";
 import { useProjects } from "../../data/useProjects";
-import { MAP_PIXEL_BOUNDS, MAP_IMAGE_URL } from "../../config/mapConfig";
+import { MAP_PIXEL_BOUNDS, type MapTheme } from "../../config/mapConfig";
 import { useHoverCapable } from "../../hooks/useHoverCapable";
 import { useIsMobileViewport } from "../../hooks/useIsMobileViewport";
 import { ProjectMarker } from "./ProjectMarker";
@@ -14,6 +14,38 @@ import { CardConnector } from "./CardConnector";
 import { INTRO_PENDING_CLASS, applyHomeView, useMapIntro } from "./useMapIntro";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import "./markers.css";
+import "./mapThemes.css";
+
+// Die Kartengeometrie ist groß — erst nachladen, wenn die Karte gebraucht wird.
+const VectorMap = lazy(() => import("./VectorMap").then((m) => ({ default: m.VectorMap })));
+
+const THEME_STORAGE_KEY = "scc-karte-theme";
+
+/** Helle oder dunkle Karte; die Wahl des Besuchers wird im Browser gemerkt. */
+function useMapTheme(): [MapTheme, () => void] {
+  const [theme, setTheme] = useState<MapTheme>(() => {
+    try {
+      return window.localStorage.getItem(THEME_STORAGE_KEY) === "leuchtkarte"
+        ? "leuchtkarte"
+        : "evolution";
+    } catch {
+      // Browser-Speicher gesperrt (z. B. privates Fenster) — helle Karte.
+      return "evolution";
+    }
+  });
+  const toggleTheme = useCallback(() => {
+    setTheme((current) => {
+      const next = current === "leuchtkarte" ? "evolution" : "leuchtkarte";
+      try {
+        window.localStorage.setItem(THEME_STORAGE_KEY, next);
+      } catch {
+        // Ohne Speicher gilt die Wahl nur für diesen Seitenaufruf.
+      }
+      return next;
+    });
+  }, []);
+  return [theme, toggleTheme];
+}
 import styles from "./ProjectMap.module.css";
 
 function cardIdFor(id: string) {
@@ -313,6 +345,8 @@ function MapContent({
 
 export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) {
   const { projects, error } = useProjects();
+  const [theme, toggleTheme] = useMapTheme();
+  const isDark = theme === "leuchtkarte";
   const hoverCapable = useHoverCapable();
   const isMobileViewport = useIsMobileViewport();
   const [ready, setReady] = useState(false);
@@ -329,6 +363,7 @@ export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) 
         ]
           .filter(Boolean)
           .join(" ")}
+        data-map-theme={theme}
         role="region"
         aria-label="Karte mit SCC-Courts-Projektstandorten"
       >
@@ -352,7 +387,9 @@ export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) 
           style={{ height: "100%", width: "100%" }}
           whenReady={() => setReady(true)}
         >
-          <ImageOverlay url={MAP_IMAGE_URL} bounds={MAP_PIXEL_BOUNDS} />
+          <Suspense fallback={null}>
+            <VectorMap />
+          </Suspense>
           <MapContent
             projects={projects}
             hoverCapable={hoverCapable}
@@ -361,6 +398,31 @@ export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) 
             closeActiveRef={closeActiveRef}
           />
         </MapContainer>
+        <button
+          type="button"
+          className={styles.themeToggle}
+          onClick={toggleTheme}
+          aria-pressed={isDark}
+          aria-label={isDark ? "Helle Karte anzeigen" : "Dunkle Karte anzeigen"}
+          title={isDark ? "Helle Karte" : "Dunkle Karte"}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            {isDark ? (
+              <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+              </g>
+            ) : (
+              <path
+                d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+            )}
+          </svg>
+        </button>
       </div>
 
       {error && projects.length === 0 ? (

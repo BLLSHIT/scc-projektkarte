@@ -19,9 +19,10 @@
   height: 14px;
   margin: 4px;
   border-radius: 50%;
-  background: #036147;
-  border: 2px solid #f6f3ee;
-  box-shadow: 0 1px 4px rgba(3, 25, 18, 0.35);
+  /* Farben per Variable, damit die Karten-Themes (mapThemes.css) sie setzen können. */
+  background: var(--scc-marker-fill, #036147);
+  border: 2px solid var(--scc-marker-border, #f6f3ee);
+  box-shadow: var(--scc-marker-shadow, 0 1px 4px rgba(3, 25, 18, 0.35));
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease,
@@ -37,10 +38,10 @@
 .scc-marker:focus-visible .scc-marker__dot,
 .scc-marker--active .scc-marker__dot {
   transform: scale(1.35);
-  background: #024a37;
+  background: var(--scc-marker-fill-active, #024a37);
   box-shadow:
-    0 0 0 6px rgba(3, 97, 71, 0.16),
-    0 2px 6px rgba(3, 25, 18, 0.35);
+    0 0 0 6px var(--scc-marker-halo, rgba(3, 97, 71, 0.16)),
+    var(--scc-marker-shadow, 0 2px 6px rgba(3, 25, 18, 0.35));
 }
 
 .scc-marker:focus-visible .scc-marker__dot {
@@ -66,8 +67,8 @@
   height: 20px;
   border-radius: 50%;
   background: #fff;
-  border: 1.5px solid #141414;
-  box-shadow: 0 1px 4px rgba(3, 25, 18, 0.35);
+  border: 1.5px solid var(--scc-popup-border, #141414);
+  box-shadow: var(--scc-popup-shadow, 0 1px 4px rgba(3, 25, 18, 0.35));
   overflow: hidden;
   transition:
     transform 0.18s ease,
@@ -88,8 +89,8 @@
 .scc-marker--popup.scc-marker--active .scc-marker__logo-wrap {
   transform: scale(1.25);
   box-shadow:
-    0 0 0 6px rgba(20, 20, 20, 0.16),
-    0 2px 6px rgba(3, 25, 18, 0.35);
+    0 0 0 6px var(--scc-popup-halo, rgba(20, 20, 20, 0.16)),
+    var(--scc-popup-shadow, 0 2px 6px rgba(3, 25, 18, 0.35));
 }
 
 .scc-marker--popup:focus-visible .scc-marker__logo-wrap {
@@ -117,14 +118,14 @@
   position: absolute;
   inset: 4px;
   border-radius: 50%;
-  border: 1.5px solid rgba(3, 97, 71, 0.6);
+  border: 1.5px solid var(--scc-marker-pulse, rgba(3, 97, 71, 0.6));
   pointer-events: none;
   animation: scc-marker-pulse 2.6s ease-out infinite;
 }
 
 .scc-marker--popup.scc-marker--active::after {
   inset: 0;
-  border-color: rgba(20, 20, 20, 0.5);
+  border-color: var(--scc-popup-pulse, rgba(20, 20, 20, 0.5));
 }
 
 @keyframes scc-marker-pulse {

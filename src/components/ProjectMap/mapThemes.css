@@ -1,0 +1,120 @@
+/*
+ * Vektorkarte (VectorMap) und ihre Themes.
+ *
+ * Global statt CSS-Modul, weil Leaflet die SVG-Ebene und die Marker selbst
+ * ins DOM setzt. Ein Theme ist ein Satz CSS-Variablen am Karten-Wrapper
+ * (data-map-theme); Karte, Marker (markers.css), Verbindungslinie und
+ * Zoom-Steuerung lesen daraus ihre Farben.
+ */
+
+/* Weicher Wechsel zwischen heller und dunkler Karte. */
+.scc-vmap rect,
+.scc-vmap path {
+  transition:
+    fill 0.5s ease,
+    stroke 0.5s ease;
+}
+
+.scc-vmap__sea {
+  fill: var(--vmap-sea);
+}
+
+.scc-vmap__neighbors,
+.scc-vmap__dach {
+  stroke-width: 1;
+  stroke-linejoin: round;
+  /* Linien bleiben in jeder Zoomstufe gleich fein. */
+  vector-effect: non-scaling-stroke;
+}
+
+.scc-vmap__neighbors {
+  fill: var(--vmap-neighbor);
+  stroke: var(--vmap-neighbor-line);
+}
+
+.scc-vmap__dach {
+  fill: var(--vmap-dach);
+  stroke: var(--vmap-dach-line);
+}
+
+.scc-vmap__shadow-color {
+  flood-color: var(--vmap-shadow);
+}
+
+.scc-vmap__germany-shadow {
+  fill: var(--vmap-germany);
+  filter: url(#scc-vmap-shadow);
+}
+
+.scc-vmap__germany {
+  fill: var(--vmap-germany);
+}
+
+/* Bundesländer: ganz feine Linien. */
+.scc-vmap__states {
+  fill: none;
+  stroke: var(--vmap-state-line);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.scc-vmap__germany-glow {
+  fill: none;
+  stroke: var(--vmap-glow, transparent);
+  stroke-width: 5;
+  filter: url(#scc-vmap-glow);
+}
+
+.scc-vmap__germany-outline {
+  fill: none;
+  stroke: var(--vmap-germany-line);
+  stroke-width: var(--vmap-germany-line-width, 1.6);
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Helle Karte ("Evolution"). */
+[data-map-theme="evolution"] {
+  --scc-map-bg: #dbe6df;
+  --vmap-sea: #dbe6df;
+  --vmap-neighbor: #a9c4b5;
+  --vmap-neighbor-line: #c6d9ce;
+  --vmap-dach: #bdd3c6;
+  --vmap-dach-line: #d9e6de;
+  --vmap-germany: #f6f3ee;
+  --vmap-germany-line: #036147;
+  --vmap-state-line: rgba(3, 97, 71, 0.2);
+  --vmap-shadow: rgba(3, 25, 18, 0.3);
+}
+
+/* Dunkle Karte ("Leuchtkarte"): dunkle Bühne, leuchtende Standorte. */
+[data-map-theme="leuchtkarte"] {
+  --scc-map-bg: #06120e;
+  --vmap-sea: #06120e;
+  --vmap-neighbor: #0c1f18;
+  --vmap-neighbor-line: #173429;
+  --vmap-dach: #102a21;
+  --vmap-dach-line: #1f4a3a;
+  --vmap-germany: #14382c;
+  --vmap-germany-line: #6ee7b7;
+  --vmap-germany-line-width: 1.3;
+  --vmap-glow: rgba(110, 231, 183, 0.55);
+  --vmap-state-line: rgba(110, 231, 183, 0.16);
+  --vmap-shadow: rgba(0, 0, 0, 0.6);
+
+  --scc-marker-fill: #7ff0c5;
+  --scc-marker-fill-active: #ffffff;
+  --scc-marker-border: #06120e;
+  --scc-marker-shadow: 0 0 10px rgba(127, 240, 197, 0.85);
+  --scc-marker-halo: rgba(127, 240, 197, 0.22);
+  --scc-marker-pulse: rgba(127, 240, 197, 0.8);
+  --scc-popup-border: #ffffff;
+  --scc-popup-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  --scc-popup-halo: rgba(255, 255, 255, 0.22);
+  --scc-popup-pulse: rgba(255, 255, 255, 0.75);
+  --scc-connector: #7ff0c5;
+  --scc-zoom-bg: #102a21;
+  --scc-zoom-color: #7ff0c5;
+  --scc-zoom-bg-hover: #173d30;
+}
