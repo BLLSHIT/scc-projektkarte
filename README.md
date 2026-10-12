@@ -52,8 +52,6 @@ Die Projekte kommen aus einem Google Sheet, das die Seite bei jedem Aufruf als C
 - Die Zahl „Insgesamt … Courts gebaut" ist die Summe der Spalte „Courts" (Pop-Up-Tour eingerechnet). Fehlt dort der Wert, zählen ersatzweise die Stückzahlen aus „Court-Typ".
 - Lädt das Sheet nicht, zeigt die Live-Seite die Karte ohne Marker und einen Hinweis. Die Platzhalterdaten in [`src/data/projects.ts`](src/data/projects.ts) erscheinen nur in der lokalen Entwicklung.
 
-`scripts/xlsx-to-csv.py` und `public/data/projects.csv` stammen aus einer früheren Excel-Anbindung und werden von der Seite nicht mehr verwendet.
-
 ## Karte
 
 Die Karte ist eine gezeichnete Vektorkarte des DACH-Raums ([`src/components/ProjectMap/VectorMap.tsx`](src/components/ProjectMap/VectorMap.tsx)) mit Bundesländern als feinen Linien.
