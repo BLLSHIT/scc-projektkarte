@@ -23,9 +23,20 @@
   flex-shrink: 0;
 }
 
+.total {
+  transition: opacity 0.6s ease;
+}
+
+.totalPending {
+  opacity: 0;
+}
+
 .totalNumber {
+  display: inline-block;
+  text-align: right;
   color: #036147;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .legendLogoWrap {

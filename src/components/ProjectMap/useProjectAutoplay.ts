@@ -3,8 +3,8 @@ import type { Map as LeafletMap } from "leaflet";
 import type { Project } from "../../data/projects";
 import { projectToMapPoint } from "../../config/mapConfig";
 
-/** Wartezeit nach dem Laden, bis der Durchlauf startet (Marker-Animation abwarten). */
-const START_DELAY_MS = 3000;
+/** Wartezeit nach der Einstiegsanimation, bis der Durchlauf startet. */
+const START_DELAY_MS = 1500;
 /** Wie lange eine automatisch geöffnete Projektkarte sichtbar bleibt. */
 const DWELL_MS = 6000;
 /** Dauer des Ausblendens — passend zur ".calm"-Transition der Projektkarte. */

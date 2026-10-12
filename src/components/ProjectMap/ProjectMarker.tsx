@@ -4,6 +4,7 @@ import { useMap } from "react-leaflet";
 import type { Project } from "../../data/projects";
 import { projectToMapPoint } from "../../config/mapConfig";
 import { AFP_LOGO_URL } from "../BrandBadge/resolveBrand";
+import { MARKER_STAGGER_MS } from "./useMapIntro";
 
 type ProjectMarkerProps = {
   project: Project;
@@ -66,7 +67,7 @@ export function ProjectMarker({
 
     const el = marker.getElement();
     if (el) {
-      el.style.setProperty("--scc-marker-delay", `${Math.min(index, 14) * 70}ms`);
+      el.style.setProperty("--scc-marker-delay", `${index * MARKER_STAGGER_MS}ms`);
       el.setAttribute("role", "button");
       el.setAttribute("tabindex", "0");
       el.setAttribute("aria-haspopup", "dialog");

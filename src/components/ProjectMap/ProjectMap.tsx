@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { ImageOverlay, MapContainer, useMap } from "react-leaflet";
@@ -10,6 +10,8 @@ import { useIsMobileViewport } from "../../hooks/useIsMobileViewport";
 import { ProjectMarker } from "./ProjectMarker";
 import { ProjectCard } from "./ProjectCard";
 import { useProjectAutoplay } from "./useProjectAutoplay";
+import { CardConnector } from "./CardConnector";
+import { INTRO_PENDING_CLASS, applyHomeView, useMapIntro } from "./useMapIntro";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import "./markers.css";
 import styles from "./ProjectMap.module.css";
@@ -45,8 +47,20 @@ function MapContent({
   // mit schwebender Projektkarte: In der mobilen Ansicht steht die Karte
   // unterhalb der Map und würde bei jedem Wechsel den Seiteninhalt verschieben.
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  // Einstieg: sanfter Zoom auf Deutschland, Marker erscheinen von Nord nach
+  // Süd. Der Durchlauf startet erst danach.
+  const { introDone, introStartedRef } = useMapIntro(map, projects.length, reducedMotion);
+  const appearRank = useMemo(
+    () =>
+      new Map(
+        [...projects]
+          .sort((a, b) => b.latitude - a.latitude)
+          .map((project, rank) => [project.id, rank] as const),
+      ),
+    [projects],
+  );
   const { isAutoShown, isAutoLeaving, claimForUser } = useProjectAutoplay({
-    enabled: !isMobileViewport && !reducedMotion,
+    enabled: !isMobileViewport && !reducedMotion && introDone,
     projects,
     map,
     activeId,
@@ -58,6 +72,12 @@ function MapContent({
   useEffect(() => {
     map.getContainer().classList.toggle("scc-map--autoplay", !userHasSelection);
   }, [map, userHasSelection]);
+  // Übrige Marker treten zurück, solange eine Projektkarte gezeigt wird
+  // (siehe ".scc-map--has-active" in markers.css).
+  const hasVisibleCard = activeId != null && !isAutoLeaving;
+  useEffect(() => {
+    map.getContainer().classList.toggle("scc-map--has-active", hasVisibleCard);
+  }, [map, hasVisibleCard]);
 
   // Hover-Intent: Schließen bei mouseleave leicht verzögern und abbrechen
   // können, damit man die Maus vom Marker in die Projektkarte bewegen kann
@@ -163,6 +183,8 @@ function MapContent({
       const fitZoom = map.getZoom();
       map.setMinZoom(fitZoom);
       map.setMaxZoom(fitZoom + 4);
+      // Ab dem Einstieg ist die Deutschland-Ansicht die Ausgangsansicht.
+      if (introStartedRef.current) applyHomeView(map);
       updateSize();
     };
 
@@ -172,7 +194,7 @@ function MapContent({
     resizeObserver.observe(container);
 
     return () => resizeObserver.disconnect();
-  }, [map]);
+  }, [map, introStartedRef]);
 
   // Ankerposition der aktiven Projektkarte aus Lat/Lon berechnen — auch bei
   // Zoom/Pan der Karte live nachführen, solange eine Karte offen ist.
@@ -242,7 +264,7 @@ function MapContent({
         <ProjectMarker
           key={project.id}
           project={project}
-          index={index}
+          index={appearRank.get(project.id) ?? index}
           isActive={activeId === project.id}
           hoverCapable={hoverCapable}
           cardId={cardIdFor(project.id)}
@@ -276,6 +298,15 @@ function MapContent({
           leaving={isAutoLeaving}
         />
       ) : null}
+      {!isMobileViewport && activeProject && anchor ? (
+        <CardConnector
+          key={activeProject.id}
+          project={activeProject}
+          cardId={cardIdFor(activeProject.id)}
+          calm={isAutoShown}
+          leaving={isAutoLeaving}
+        />
+      ) : null}
     </>
   );
 }
@@ -302,6 +333,7 @@ export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) 
         aria-label="Karte mit SCC-Courts-Projektstandorten"
       >
         <MapContainer
+          className={INTRO_PENDING_CLASS}
           crs={L.CRS.Simple}
           minZoom={-5}
           bounds={MAP_PIXEL_BOUNDS}
