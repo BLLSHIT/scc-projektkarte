@@ -4,8 +4,14 @@
  * anpassen kann. Gemeinsam genutzt von allen embed-*.tsx Einstiegspunkten.
  */
 export function reportEmbedHeight() {
+  let lastHeight = -1;
   const report = () => {
-    const height = document.documentElement.scrollHeight;
+    // Höhe des Inhalts (body), nicht des Dokuments: Dessen scrollHeight ist
+    // nie kleiner als das iframe selbst — das iframe könnte dann nur wachsen
+    // und bliebe nach dem Schließen der Projektkarte zu hoch.
+    const height = Math.ceil(document.body.getBoundingClientRect().height);
+    if (height === lastHeight) return;
+    lastHeight = height;
     window.parent?.postMessage({ sccMapEmbedHeight: height }, "*");
   };
 
