@@ -23,9 +23,10 @@ const THEME_STORAGE_KEY = "scc-karte-theme";
 /**
  * Helle oder dunkle Karte. Ohne eigene Wahl folgt sie der Systemeinstellung
  * des Besuchers (auch bei späterem Wechsel); sobald er den Umschalter nutzt,
- * gilt seine Wahl und wird im Browser gemerkt.
+ * gilt seine Wahl und wird im Browser gemerkt. Mit `followSystem = false`
+ * (Embeds auf der hellen Website) startet die Karte immer hell.
  */
-function useMapTheme(): [MapTheme, () => void] {
+function useMapTheme(followSystem: boolean): [MapTheme, () => void] {
   const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
   const [choice, setChoice] = useState<MapTheme | null>(() => {
     try {
@@ -36,7 +37,7 @@ function useMapTheme(): [MapTheme, () => void] {
       return null;
     }
   });
-  const theme: MapTheme = choice ?? (systemDark ? "leuchtkarte" : "evolution");
+  const theme: MapTheme = choice ?? (followSystem && systemDark ? "leuchtkarte" : "evolution");
   const toggleTheme = useCallback(() => {
     const next: MapTheme = theme === "leuchtkarte" ? "evolution" : "leuchtkarte";
     setChoice(next);
@@ -353,9 +354,15 @@ function MapContent({
   );
 }
 
-export function ProjectMap({ fullWidth = false }: { fullWidth?: boolean } = {}) {
+type ProjectMapProps = {
+  fullWidth?: boolean;
+  /** Karte startet immer hell statt der Systemeinstellung zu folgen (Embeds). */
+  startLight?: boolean;
+};
+
+export function ProjectMap({ fullWidth = false, startLight = false }: ProjectMapProps = {}) {
   const { projects, error } = useProjects();
-  const [theme, toggleTheme] = useMapTheme();
+  const [theme, toggleTheme] = useMapTheme(!startLight);
   const isDark = theme === "leuchtkarte";
   const hoverCapable = useHoverCapable();
   const isMobileViewport = useIsMobileViewport();

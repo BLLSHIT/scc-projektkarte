@@ -8,7 +8,7 @@ import "./embed.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ProjectMap fullWidth />
+    <ProjectMap fullWidth startLight />
     <Legend />
     <ProjectList fullWidth />
   </StrictMode>,
