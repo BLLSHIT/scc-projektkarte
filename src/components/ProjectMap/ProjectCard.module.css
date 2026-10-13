@@ -210,3 +210,93 @@
   background: rgba(3, 97, 71, 0.08);
   color: #036147;
 }
+
+.courtLabel {
+  min-width: 0;
+}
+
+.courtMore {
+  color: #5c6b62;
+}
+
+/*
+ * Schwebende Karte auf der Map: immer gleich hoch, damit Ober- und Unterkante
+ * beim Wechsel zwischen Projekten nicht wandern. Der Text steht in festen
+ * Zonen (Name zwei Zeilen, Ort, Tags, drei Zeilen Court-Typen); das Bild
+ * füllt den übrigen Platz. Die angedockte Karte (mobil) bleibt inhaltshoch.
+ */
+.floating {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 380px;
+  overflow: hidden;
+}
+
+.floating .image {
+  flex: 1 1 0;
+  min-height: 0;
+  height: auto;
+}
+
+.floating .nameRow {
+  flex-shrink: 0;
+  /* Platz für zwei Zeilen; einzeilige Namen stehen direkt über dem Ort. */
+  min-height: calc(1.28rem * 1.15 * 2);
+  align-items: flex-end;
+}
+
+.floating .name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.floating .location {
+  flex-shrink: 0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floating .facts {
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.floating .facts li {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.floating .courtBreakdown {
+  flex-shrink: 0;
+  margin-bottom: 0;
+  /* Immer Platz für drei Zeilen. */
+  min-height: calc(9px + 3 * 0.86rem * 1.3 + 2 * 4px);
+  box-sizing: border-box;
+}
+
+.floating .courtBreakdown li {
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.floating .courtLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floating .link {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 12px;
+  line-height: 1.3;
+}

@@ -36,6 +36,8 @@ const MARGIN = 12;
 const SIDE_GAP = 28;
 /** Abstand der festen Plätze links/rechts zum Kartenrand (ohne freien Bereich). */
 const SLOT_INSET = 24;
+/** Zeilen für Court-Typen in der schwebenden Karte (inkl. "+ n weitere"). */
+const MAX_TYPE_LINES = 3;
 
 export function ProjectCard({
   project,
@@ -120,6 +122,15 @@ export function ProjectCard({
   const brandDisplay = resolveBrandDisplay(project);
 
   const courtBreakdown = parseCourtBreakdown(project.courtType);
+  // Die schwebende Karte ist immer gleich hoch (siehe ".floating" im CSS) und
+  // zeigt höchstens MAX_TYPE_LINES Zeilen Court-Typen; bei mehr Typen ersetzt
+  // die letzte Zeile den Rest durch "+ n weitere". Vollständig stehen sie in
+  // der Projektliste und in der mobilen Ansicht.
+  const visibleTypes =
+    isFloating && courtBreakdown.length > MAX_TYPE_LINES
+      ? courtBreakdown.slice(0, MAX_TYPE_LINES - 1)
+      : courtBreakdown;
+  const hiddenTypeCount = courtBreakdown.length - visibleTypes.length;
   const facts = [
     project.courts != null ? `${project.courts} Court${project.courts === 1 ? "" : "s"}` : null,
     ...splitTags(project.indoorOutdoor),
@@ -185,16 +196,20 @@ export function ProjectCard({
 
       {courtBreakdown.length > 0 ? (
         <ul className={styles.courtBreakdown}>
-          {courtBreakdown.map((item, i) => (
+          {visibleTypes.map((item, i) => (
             <li key={`${item.label}-${i}`}>
               {item.count != null ? <span className={styles.courtCount}>{item.count}×</span> : null}
-              {item.label}
+              <span className={styles.courtLabel}>{item.label}</span>
             </li>
           ))}
+          {hiddenTypeCount > 0 ? (
+            <li className={styles.courtMore}>+ {hiddenTypeCount} weitere</li>
+          ) : null}
         </ul>
       ) : null}
 
-      {project.description ? (
+      {/* Nicht in der schwebenden Karte: Deren Höhe ist fest, ein freier Text passt nicht hinein. */}
+      {project.description && !isFloating ? (
         <p className={styles.description}>{project.description}</p>
       ) : null}
 
