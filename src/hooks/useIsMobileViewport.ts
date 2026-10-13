@@ -1,6 +1,6 @@
 import { useMediaQuery } from "./useMediaQuery";
 
-const QUERY = "(max-width: 640px)";
+export const MOBILE_VIEWPORT_QUERY = "(max-width: 640px)";
 
 /**
  * Layout-Breakpoint (nicht Touch-Erkennung — dafür siehe useHoverCapable).
@@ -8,5 +8,5 @@ const QUERY = "(max-width: 640px)";
  * dort unterhalb der Karte angezeigt statt als schwebende Karte am Marker.
  */
 export function useIsMobileViewport(): boolean {
-  return useMediaQuery(QUERY);
+  return useMediaQuery(MOBILE_VIEWPORT_QUERY);
 }

@@ -229,7 +229,9 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  height: 380px;
+  /* In niedrigen Kartenfenstern (z. B. Handy im Querformat) schrumpft die
+     Karte mit; das Bild gibt den Platz ab. */
+  height: min(380px, calc(100% - 24px));
   overflow: hidden;
 }
 

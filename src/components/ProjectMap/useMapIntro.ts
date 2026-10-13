@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { point } from "leaflet";
 import type { FitBoundsOptions, LatLngBoundsExpression, Map as LeafletMap } from "leaflet";
 import { HOME_GEO_BOUNDS, projectToMapPoint } from "../../config/mapConfig";
+import { MOBILE_VIEWPORT_QUERY } from "../../hooks/useIsMobileViewport";
 
 /** Klasse am Kartencontainer, solange die Marker noch nicht eingeblendet sind
  * (hält deren Erscheinen-Animation an, siehe markers.css). */
@@ -24,12 +25,17 @@ const HOME_BOUNDS: LatLngBoundsExpression = [
 /** Abstand der Ausgangsansicht zum oberen und unteren Kartenrand (px). */
 const HOME_VERTICAL_PADDING = 16;
 
-/** Auf breiten Karten bleibt links Platz für die schwebende Projektkarte. */
-const homeLeftPadding = (map: LeafletMap) => (map.getSize().x > 760 ? 320 : 24);
+/**
+ * Überall, wo die Projektkarte schwebend in der Map erscheint (alles außer der
+ * mobilen Ansicht), bleibt links Platz für sie — Deutschland rückt nach rechts.
+ * Mobil steht die Projektkarte unter der Map, dort wird zentriert.
+ */
+const homeLeftPadding = () =>
+  window.matchMedia(MOBILE_VIEWPORT_QUERY).matches ? 24 : 320;
 
-function homeViewOptions(map: LeafletMap): FitBoundsOptions {
+function homeViewOptions(): FitBoundsOptions {
   return {
-    paddingTopLeft: [homeLeftPadding(map), HOME_VERTICAL_PADDING],
+    paddingTopLeft: [homeLeftPadding(), HOME_VERTICAL_PADDING],
     paddingBottomRight: [24, HOME_VERTICAL_PADDING],
   };
 }
@@ -39,14 +45,14 @@ export function homeViewScale(map: LeafletMap): number {
   const zoom = map.getBoundsZoom(
     HOME_BOUNDS,
     false,
-    point(homeLeftPadding(map) + 24, 2 * HOME_VERTICAL_PADDING),
+    point(homeLeftPadding() + 24, 2 * HOME_VERTICAL_PADDING),
   );
   return map.getZoomScale(zoom, 0);
 }
 
 /** Ausgangsansicht nach dem Einstieg: Deutschland formatfüllend, ohne Animation. */
 export function applyHomeView(map: LeafletMap) {
-  map.fitBounds(HOME_BOUNDS, { ...homeViewOptions(map), animate: false });
+  map.fitBounds(HOME_BOUNDS, { ...homeViewOptions(), animate: false });
 }
 
 /**
@@ -78,7 +84,7 @@ export function useMapIntro(
         return;
       }
       map.flyToBounds(HOME_BOUNDS, {
-        ...homeViewOptions(map),
+        ...homeViewOptions(),
         duration: ZOOM_DURATION_S,
         easeLinearity: 0.3,
       });

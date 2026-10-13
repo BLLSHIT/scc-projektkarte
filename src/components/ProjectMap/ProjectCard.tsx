@@ -36,6 +36,8 @@ const MARGIN = 12;
 const SIDE_GAP = 28;
 /** Abstand der festen Plätze links/rechts zum Kartenrand (ohne freien Bereich). */
 const SLOT_INSET = 24;
+/** Ab diesem Abstand (halbe Markergröße) gilt ein Marker als von der Karte verdeckt. */
+const MARKER_CLEARANCE = 12;
 /** Zeilen für Court-Typen in der schwebenden Karte (inkl. "+ n weitere"). */
 const MAX_TYPE_LINES = 3;
 
@@ -109,10 +111,10 @@ export function ProjectCard({
       const leftSlot = SLOT_INSET;
       const rightSlot = Math.max(containerWidth - cw - SLOT_INSET, SLOT_INSET);
       const covers = (slot: number) =>
-        anchorX >= slot - SIDE_GAP &&
-        anchorX <= slot + cw + SIDE_GAP &&
-        anchorY >= top - SIDE_GAP &&
-        anchorY <= top + ch + SIDE_GAP;
+        anchorX >= slot - MARKER_CLEARANCE &&
+        anchorX <= slot + cw + MARKER_CLEARANCE &&
+        anchorY >= top - MARKER_CLEARANCE &&
+        anchorY <= top + ch + MARKER_CLEARANCE;
       left = covers(leftSlot) && !covers(rightSlot) ? rightSlot : leftSlot;
     }
 
