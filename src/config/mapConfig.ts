@@ -32,6 +32,13 @@ export function projectToMapPoint(
  * und die Schweiz sind am unteren Rand angeschnitten zu sehen. */
 export const HOME_GEO_BOUNDS = { south: 47.27, west: 5.87, north: 55.06, east: 15.04 };
 
+/**
+ * Mindesthöhe des Kartenfensters für die schwebende Projektkarte (380 px plus
+ * Rand). Ist das Fenster niedriger — etwa auf dem Handy im Querformat —, steht
+ * die Projektkarte wie in der mobilen Ansicht unter der Map.
+ */
+export const MIN_FLOATING_MAP_HEIGHT = 404;
+
 /** [[0, 0], [height, width]] — Grenzen der Zeichenfläche für CRS.Simple. */
 export const MAP_PIXEL_BOUNDS: [[number, number], [number, number]] = [
   [0, 0],

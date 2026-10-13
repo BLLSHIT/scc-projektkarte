@@ -4,7 +4,12 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, useMap } from "react-leaflet";
 import type { Project } from "../../data/projects";
 import { useProjects } from "../../data/useProjects";
-import { MAP_PIXEL_BOUNDS, projectToMapPoint, type MapTheme } from "../../config/mapConfig";
+import {
+  MAP_PIXEL_BOUNDS,
+  MIN_FLOATING_MAP_HEIGHT,
+  projectToMapPoint,
+  type MapTheme,
+} from "../../config/mapConfig";
 import { useHoverCapable } from "../../hooks/useHoverCapable";
 import { useIsMobileViewport } from "../../hooks/useIsMobileViewport";
 import { ProjectMarker } from "./ProjectMarker";
@@ -366,6 +371,22 @@ export function ProjectMap({ fullWidth = false, startLight = false }: ProjectMap
   const isDark = theme === "leuchtkarte";
   const hoverCapable = useHoverCapable();
   const isMobileViewport = useIsMobileViewport();
+  // Ist das Kartenfenster zu niedrig für die schwebende Projektkarte (z. B.
+  // Handy im Querformat), gilt dasselbe Layout wie mobil: Projektkarte unter
+  // der Map, kein Durchlauf. Maßgeblich ist die Höhe der Karte, nicht die des
+  // Fensters — die hängt in Embeds vom Inhalt ab und würde sich beim Öffnen
+  // einer Projektkarte ändern.
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [mapHeight, setMapHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => setMapHeight(el.clientHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const cardBelowMap =
+    isMobileViewport || (mapHeight != null && mapHeight < MIN_FLOATING_MAP_HEIGHT);
   const [ready, setReady] = useState(false);
   const [dockedProject, setDockedProject] = useState<Project | null>(null);
   const closeActiveRef = useRef<() => void>(() => {});
@@ -380,6 +401,7 @@ export function ProjectMap({ fullWidth = false, startLight = false }: ProjectMap
         ]
           .filter(Boolean)
           .join(" ")}
+        ref={wrapperRef}
         data-map-theme={theme}
         role="region"
         aria-label="Karte mit SCC-Courts-Projektstandorten"
@@ -410,7 +432,7 @@ export function ProjectMap({ fullWidth = false, startLight = false }: ProjectMap
           <MapContent
             projects={projects}
             hoverCapable={hoverCapable}
-            isMobileViewport={isMobileViewport}
+            isMobileViewport={cardBelowMap}
             onActiveProjectChange={setDockedProject}
             closeActiveRef={closeActiveRef}
           />
@@ -448,7 +470,7 @@ export function ProjectMap({ fullWidth = false, startLight = false }: ProjectMap
         </p>
       ) : null}
 
-      {isMobileViewport && dockedProject ? (
+      {cardBelowMap && dockedProject ? (
         <ProjectCard
           project={dockedProject}
           variant="docked"

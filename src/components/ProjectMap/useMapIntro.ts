@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { point } from "leaflet";
 import type { FitBoundsOptions, LatLngBoundsExpression, Map as LeafletMap } from "leaflet";
-import { HOME_GEO_BOUNDS, projectToMapPoint } from "../../config/mapConfig";
+import {
+  HOME_GEO_BOUNDS,
+  MIN_FLOATING_MAP_HEIGHT,
+  projectToMapPoint,
+} from "../../config/mapConfig";
 import { MOBILE_VIEWPORT_QUERY } from "../../hooks/useIsMobileViewport";
 
 /** Klasse am Kartencontainer, solange die Marker noch nicht eingeblendet sind
@@ -26,16 +30,19 @@ const HOME_BOUNDS: LatLngBoundsExpression = [
 const HOME_VERTICAL_PADDING = 16;
 
 /**
- * Überall, wo die Projektkarte schwebend in der Map erscheint (alles außer der
- * mobilen Ansicht), bleibt links Platz für sie — Deutschland rückt nach rechts.
- * Mobil steht die Projektkarte unter der Map, dort wird zentriert.
+ * Überall, wo die Projektkarte schwebend in der Map erscheint, bleibt links
+ * Platz für sie — Deutschland rückt nach rechts. In der mobilen Ansicht und in
+ * zu niedrigen Kartenfenstern steht die Projektkarte unter der Map, dort wird
+ * zentriert (gleiche Bedingung wie in ProjectMap).
  */
-const homeLeftPadding = () =>
-  window.matchMedia(MOBILE_VIEWPORT_QUERY).matches ? 24 : 320;
+const homeLeftPadding = (map: LeafletMap) =>
+  window.matchMedia(MOBILE_VIEWPORT_QUERY).matches || map.getSize().y < MIN_FLOATING_MAP_HEIGHT
+    ? 24
+    : 320;
 
-function homeViewOptions(): FitBoundsOptions {
+function homeViewOptions(map: LeafletMap): FitBoundsOptions {
   return {
-    paddingTopLeft: [homeLeftPadding(), HOME_VERTICAL_PADDING],
+    paddingTopLeft: [homeLeftPadding(map), HOME_VERTICAL_PADDING],
     paddingBottomRight: [24, HOME_VERTICAL_PADDING],
   };
 }
@@ -45,14 +52,14 @@ export function homeViewScale(map: LeafletMap): number {
   const zoom = map.getBoundsZoom(
     HOME_BOUNDS,
     false,
-    point(homeLeftPadding() + 24, 2 * HOME_VERTICAL_PADDING),
+    point(homeLeftPadding(map) + 24, 2 * HOME_VERTICAL_PADDING),
   );
   return map.getZoomScale(zoom, 0);
 }
 
 /** Ausgangsansicht nach dem Einstieg: Deutschland formatfüllend, ohne Animation. */
 export function applyHomeView(map: LeafletMap) {
-  map.fitBounds(HOME_BOUNDS, { ...homeViewOptions(), animate: false });
+  map.fitBounds(HOME_BOUNDS, { ...homeViewOptions(map), animate: false });
 }
 
 /**
@@ -84,7 +91,7 @@ export function useMapIntro(
         return;
       }
       map.flyToBounds(HOME_BOUNDS, {
-        ...homeViewOptions(),
+        ...homeViewOptions(map),
         duration: ZOOM_DURATION_S,
         easeLinearity: 0.3,
       });
