@@ -431,7 +431,10 @@ export function ProjectMap({ fullWidth = false, startLight = false }: ProjectMap
           </Suspense>
           <MapContent
             projects={projects}
-            hoverCapable={hoverCapable}
+            // Steht die Projektkarte unter der Map, öffnet nur Klick/Tipp:
+            // Per Hover würde der Seiteninhalt darunter bei jeder
+            // Mausbewegung über einen Marker springen.
+            hoverCapable={hoverCapable && !cardBelowMap}
             isMobileViewport={cardBelowMap}
             onActiveProjectChange={setDockedProject}
             closeActiveRef={closeActiveRef}
