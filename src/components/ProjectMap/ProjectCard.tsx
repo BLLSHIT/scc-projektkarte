@@ -32,9 +32,10 @@ type ProjectCardProps = {
 };
 
 const MARGIN = 12;
-const GAP = 16;
-/** Seitlicher Abstand zum Marker — lässt Platz für dessen Pulsring. */
+/** Abstand zum Marker — lässt Platz für dessen Pulsring. */
 const SIDE_GAP = 28;
+/** Abstand der festen Plätze links/rechts zum Kartenrand (ohne freien Bereich). */
+const SLOT_INSET = 24;
 
 export function ProjectCard({
   project,
@@ -76,40 +77,41 @@ export function ProjectCard({
     const el = ref.current;
     if (!el) return;
 
-    const { width: cw, height: ch } = el.getBoundingClientRect();
-    const clampLeft = (value: number) =>
-      Math.min(Math.max(value, MARGIN), Math.max(containerWidth - cw - MARGIN, MARGIN));
-    const clampTop = (value: number) =>
-      Math.min(Math.max(value, MARGIN), Math.max(containerHeight - ch - MARGIN, MARGIN));
+    // Layoutmaße (offsetWidth/-Height) statt getBoundingClientRect: Die Karte
+    // ist beim Einblenden noch leicht verkleinert, was die Abstände oben und
+    // unten sonst um einige Pixel ungleich machen würde.
+    const cw = el.offsetWidth;
+    const ch = el.offsetHeight;
+
+    // Senkrecht immer mittig im Kartenfenster (gleicher Abstand oben und unten),
+    // unabhängig von der Höhe des Markers — so springt die Projektkarte beim
+    // Wechsel zwischen Projekten nicht hoch und runter.
+    const top = Math.max((containerHeight - ch) / 2, 0);
 
     // Freier Bereich zwischen linkem Kartenrand und dem westlichsten sichtbaren
     // Marker (falls bekannt): Die Projektkarte steht darin waagerecht mittig.
     const freeWidth = clearX ?? anchorX;
     const centeredLeft = Math.max((freeWidth - cw) / 2, MARGIN);
     const fitsFreeArea = centeredLeft + cw <= freeWidth - SIDE_GAP;
-    const fitsLeft = anchorX - SIDE_GAP - cw >= MARGIN;
-    const fitsRight = anchorX + SIDE_GAP + cw <= containerWidth - MARGIN;
 
     let left: number;
-    let top: number;
     if (fitsFreeArea) {
-      // Bevorzugt: mittig im freien Bereich links, auf Höhe des aktiven
-      // Markers — so verdeckt die Projektkarte keinen Pin.
+      // Bevorzugt: mittig im freien Bereich links — so verdeckt die
+      // Projektkarte keinen Pin.
       left = centeredLeft;
-      top = clampTop(anchorY - ch / 2);
-    } else if (fitsLeft || fitsRight) {
-      // Kein freier Streifen (z. B. hineingezoomt): direkt neben dem Marker,
-      // vertikal auf ihn zentriert, damit zumindest er selbst frei bleibt.
-      left = fitsLeft ? anchorX - SIDE_GAP - cw : anchorX + SIDE_GAP;
-      top = clampTop(anchorY - ch / 2);
     } else {
-      // Seitlich kein Platz (z. B. schmale Karte): darüber oder darunter.
-      const spaceAbove = anchorY - MARGIN;
-      const spaceBelow = containerHeight - anchorY - MARGIN;
-      top = clampTop(
-        spaceAbove >= ch + GAP || spaceAbove >= spaceBelow ? anchorY - GAP - ch : anchorY + GAP,
-      );
-      left = clampLeft(anchorX - cw / 2);
+      // Kein freier Streifen (z. B. hineingezoomt): fester Platz am linken Rand.
+      // Nur wenn der aktive Marker dort unter der Projektkarte läge, wechselt
+      // sie an den festen Platz am rechten Rand — so springt sie auch hier
+      // nicht von Marker zu Marker.
+      const leftSlot = SLOT_INSET;
+      const rightSlot = Math.max(containerWidth - cw - SLOT_INSET, SLOT_INSET);
+      const covers = (slot: number) =>
+        anchorX >= slot - SIDE_GAP &&
+        anchorX <= slot + cw + SIDE_GAP &&
+        anchorY >= top - SIDE_GAP &&
+        anchorY <= top + ch + SIDE_GAP;
+      left = covers(leftSlot) && !covers(rightSlot) ? rightSlot : leftSlot;
     }
 
     setStyle({ left, top });
