@@ -1,76 +1,23 @@
 /**
- * Anbindung der Projektdaten an ein Google Sheet (CSV-Export).
- *
- * Hintergrund: Der SCC-Courts-Microsoft-365-Tenant blockiert anonyme
- * "Jeder mit dem Link"-Freigaben organisationsweit — SharePoint-Links
- * verlangen daher immer eine Microsoft-Anmeldung und funktionieren nicht als
- * Datenquelle. Google Sheets hat diese Einschränkung nicht.
+ * Datenquelle der Projektkarte: das SCC CRM.
  *
  * SO AKTUALISIERT IHR DIE PROJEKTLISTE:
  *
- * 1. Projekte direkt im Google Sheet pflegen (aktuelle Tabelle: siehe Team).
- *    Spalten (erste Zeile, Reihenfolge egal, Groß-/Kleinschreibung egal):
+ * 1. Im CRM unter Marketing → Projektkarte einen Eintrag anlegen oder bearbeiten.
+ *    Sichtbar ist dort, wer die Berechtigung „Marketing“ hat (Admins immer).
  *
- *      ID | Projektname | Ort | Land | Latitude | Longitude | Google-Maps-Link |
- *      Courts | Court-Typ | Indoor/Outdoor | Pop-Up-Tour | Live |
- *      Position (oder Highlight) | Fertigstellungsjahr | Beschreibung |
- *      Bild-URL | Blog-URL | Marke | Marken-Logo-URL
+ * 2. Auf der Website erscheinen nur Einträge mit dem Häkchen „Live auf der
+ *    Karte“ — alles andere bleibt ein Entwurf. Live geht nur mit Koordinaten;
+ *    die übernimmt das CRM aus dem eingefügten Google-Maps-Link.
  *
- *    - "ID" optional — fehlt sie, wird automatisch eine aus Projektname + Ort
- *      erzeugt.
- *    - "Live": NUR Zeilen mit einem Wert (z. B. "x") in dieser Spalte werden
- *      auf der Website angezeigt — leere Zeile = Projekt bleibt unsichtbar
- *      (praktisch, um Projekte vorzubereiten, bevor sie veröffentlicht werden).
- *    - "Pop-Up-Tour": beliebiger Wert (z. B. "x") markiert ein Projekt als Teil
- *      der AFP Courts Pop-Up Tour — Marker auf der Karte und Marken-Badge
- *      zeigen dann immer das AFP-Logo statt eines grünen Punkts bzw. der
- *      Courtmarke. Leer lassen für normale Projekte.
- *    - "Position" (auch als "Highlight" erkannt): Zahl 1-4 — pinnt ein Projekt auf einen festen Platz in der
- *      ersten Reihe der Projektliste (Reihe hat 4 Karten). Gilt NUR in der
- *      Standardansicht ohne aktive Suche/Filter; sobald gefiltert/gesucht
- *      wird, greift die normale (zufällige) Sortierung für alle Projekte.
- *      Jede Zahl nur einmal vergeben — bei Duplikaten gewinnt die erste
- *      Zeile mit dieser Zahl, die zweite wird normal (zufällig) einsortiert.
- *      Leer lassen für normale, zufällig sortierte Projekte.
- *    - "Bild-URL", "Marken-Logo-URL", "Blog-URL": vollständige, öffentlich
- *      erreichbare Links. Leer lassen, wenn nicht vorhanden.
- *    - "Marke": z. B. "adidas" oder "redsport" (Freitext).
- *    - "Indoor/Outdoor": Mehrere Werte durch Komma oder Semikolon trennen,
- *      z. B. "Indoor, Outdoor" bei gemischten Anlagen — werden auf der
- *      Website automatisch als einzelne, filterbare Tags angezeigt.
- *    - "Court-Typ": Mehrere Modelle durch Komma oder Semikolon trennen, mit
- *      optionaler Anzahl je Modell, z. B. "5x High Competition, 4x AFP,
- *      4x Single" — wird auf der Website als übersichtliche Liste mit Anzahl
- *      pro Modell dargestellt (Anzahl ist optional, "High Competition, AFP"
- *      ohne Zahlen funktioniert weiterhin).
- *    - Latitude/Longitude: Punkt oder Komma als Dezimaltrennzeichen — beides
- *      wird automatisch erkannt (Google Sheets exportiert je nach
- *      Spracheinstellung mit Komma, z. B. "51,1657").
- *    - Alternative zu Latitude/Longitude: Spalte "Google-Maps-Link" mit der
- *      VOLLEN Google-Maps-URL (aus der Adressleiste kopiert, enthält
- *      "@51.1657,10.4515,17z" o. Ä.) — Koordinaten werden daraus automatisch
- *      gelesen. Funktioniert NICHT mit gekürzten "Teilen"-Links
- *      (maps.app.goo.gl/...), da dort keine Koordinaten in der URL stehen.
- *      Sind sowohl Latitude/Longitude als auch ein Maps-Link ausgefüllt,
- *      haben die manuellen Latitude/Longitude-Werte Vorrang.
+ * 3. Änderungen sind nach etwa einer Minute auf der Website sichtbar. Kein
+ *    Export, kein Upload, kein neues Deployment der Karte nötig.
  *
- * 2. Änderungen im Sheet sind sofort live — die Website lädt die Tabelle bei
- *    jedem Seitenaufruf neu über den CSV-Export-Link unten. Kein Export, kein
- *    Upload, keine weiteren Schritte nötig.
- *
- * 3. Voraussetzung: Das Sheet muss auf "Jeder mit dem Link kann anzeigen"
- *    freigegeben sein (Freigeben-Button oben rechts in Google Sheets).
- *
- * Ist die Tabelle nicht erreichbar oder enthält keine gültigen Zeilen, zeigt
- * die Live-Seite die Karte ohne Marker und einen Hinweis, dass die Projekte
- * gerade nicht geladen werden können. Die Platzhalterdaten aus
- * src/data/projects.ts erscheinen nur in der lokalen Entwicklung.
- *
- * Link-Format: https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv
- * (bei mehreren Tabellenblättern ggf. &gid={BLATT_ID} ergänzen).
+ * Die Schnittstelle liefert `{ projects: [...] }` mit den Feldern des Typs
+ * `Project` (src/data/projects.ts). Ist das CRM nicht erreichbar oder liefert
+ * es keine Live-Projekte, zeigt die Live-Seite die Karte ohne Marker und einen
+ * Hinweis, dass die Projekte gerade nicht geladen werden können. Die
+ * Platzhalterdaten aus src/data/projects.ts erscheinen nur in der lokalen
+ * Entwicklung.
  */
-export const PROJECTS_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/1dBVxDlMSVo-PhBNmZi9WRkoTV7nuqYXDJXFZxBZf3ac/export?format=csv";
-
-/** Wie oft (ms) die CSV-Quelle beim erneuten Laden der Seite als "frisch" gilt. */
-export const PROJECTS_CACHE_MS = 5 * 60 * 1000;
+export const PROJECTS_API_URL = "https://scc-crm-lilac.vercel.app/api/embed/projektkarte";

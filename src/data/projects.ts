@@ -9,10 +9,9 @@
  * weglassen (oder auf `undefined` lassen) — der Button "Zum Projektbericht"
  * wird dann automatisch nicht angezeigt.
  *
- * Diese Datei ist der Fallback/Platzhalter-Datensatz. Im Live-Betrieb können
- * Projekte stattdessen aus einer SharePoint-/Excel-CSV-Quelle geladen werden —
- * siehe src/config/dataSource.ts und src/data/useProjects.ts. Ist dort keine
- * CSV-URL hinterlegt oder schlägt der Abruf fehl, wird NUR in der lokalen
+ * Diese Datei ist der Platzhalter-Datensatz. Im Live-Betrieb kommen die
+ * Projekte aus dem CRM — siehe src/config/dataSource.ts und
+ * src/data/useProjects.ts. Schlägt der Abruf fehl, wird NUR in der lokalen
  * Entwicklung auf die Daten hier zurückgefallen — auf der Live-Seite
  * erscheinen sie nie.
  */

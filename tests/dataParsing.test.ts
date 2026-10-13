@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { VECTOR_MAP_SIZE, projectLonLat } from "../src/config/mapProjection";
 import { parseCsv } from "../src/data/csv";
 import { extractLatLngFromGoogleMapsUrl } from "../src/data/googleMapsLink";
+import { parseProjectsResponse } from "../src/data/parseProjects";
 import { parseCourtBreakdown, resolveCourtCount } from "../src/utils/parseCourtBreakdown";
 
 describe("projectLonLat", () => {
@@ -132,5 +133,56 @@ describe("resolveCourtCount", () => {
   it("liefert 0, wenn weder Courts noch Stückzahlen vorhanden sind", () => {
     expect(resolveCourtCount(undefined, "adidas PANOARENA 180°")).toBe(0);
     expect(resolveCourtCount(undefined, undefined)).toBe(0);
+  });
+});
+
+describe("parseProjectsResponse", () => {
+  const eintrag = {
+    id: "a1",
+    name: "Padel Quartier",
+    city: "Ganderkesee",
+    country: "Deutschland",
+    latitude: 53.0312511,
+    longitude: 8.5603924,
+    live: true,
+    popUpTour: false,
+    courts: 6,
+    pinnedPosition: 2,
+    completionYear: 2025,
+    image: "https://www.scc-courts.de/bild.jpg",
+    courtBrand: "redsport",
+  };
+
+  it("übernimmt die Felder aus dem CRM", () => {
+    const [project] = parseProjectsResponse({ projects: [eintrag] });
+    expect(project).toMatchObject(eintrag);
+    expect(project.blogUrl).toBeUndefined();
+  });
+
+  it("überspringt Einträge ohne Namen oder gültige Koordinaten", () => {
+    const projects = parseProjectsResponse({
+      projects: [
+        eintrag,
+        { ...eintrag, id: "a2", name: "" },
+        { ...eintrag, id: "a3", latitude: 509650413 },
+        { ...eintrag, id: "a4", longitude: null },
+        null,
+      ],
+    });
+    expect(projects.map((project) => project.id)).toEqual(["a1"]);
+  });
+
+  it("behandelt fehlende Angaben wie leere Felder", () => {
+    const [project] = parseProjectsResponse({
+      projects: [{ name: "Ohne Details", latitude: 51, longitude: 9, pinnedPosition: 7 }],
+    });
+    expect(project).toMatchObject({ id: "projekt-0", city: "", country: "Deutschland", live: false, popUpTour: false });
+    expect(project.pinnedPosition).toBeUndefined();
+    expect(project.courts).toBeUndefined();
+  });
+
+  it("lehnt eine Antwort ohne Projektliste ab", () => {
+    expect(() => parseProjectsResponse({ error: "kaputt" })).toThrow();
+    expect(() => parseProjectsResponse(null)).toThrow();
   });
 });

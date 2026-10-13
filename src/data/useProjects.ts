@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { PROJECTS_CSV_URL } from "../config/dataSource";
-import { parseCsv } from "./csv";
-import { extractLatLngFromGoogleMapsUrl } from "./googleMapsLink";
+import { PROJECTS_API_URL } from "../config/dataSource";
+import { parseProjectsResponse } from "./parseProjects";
 import { projects as fallbackProjects, type Project } from "./projects";
 
-export type ProjectsSource = "csv" | "fallback";
+export type ProjectsSource = "crm" | "fallback";
 
 type ProjectsState = {
   projects: Project[];
@@ -13,175 +12,53 @@ type ProjectsState = {
   error: string | null;
 };
 
-/** Normalisiert Spaltennamen für tolerantes Matching (Groß/Klein, Leerzeichen, Bindestrich). */
-function normalizeKey(key: string): string {
-  return key.toLowerCase().replace(/[\s\-_]/g, "");
-}
-
-function findColumn(
-  row: Record<string, string>,
-  ...candidates: string[]
-): string | undefined {
-  const normalized = new Map(
-    Object.entries(row).map(([key, value]) => [normalizeKey(key), value]),
-  );
-  for (const candidate of candidates) {
-    const value = normalized.get(normalizeKey(candidate));
-    if (value != null && value !== "") return value;
-  }
-  return undefined;
-}
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function toNumber(value: string | undefined): number | undefined {
-  if (!value) return undefined;
-  const normalized = value.replace(",", ".");
-  const num = Number(normalized);
-  return Number.isFinite(num) ? num : undefined;
-}
-
-/** Grob gültiger geografischer Bereich — schließt korrupte Werte aus (z. B.
- * Google Sheets, das Dezimalzahlen versehentlich als Tausender formatiert
- * und dadurch riesige Zahlen wie 509650413 erzeugt). */
-function isValidCoord(latitude: number, longitude: number): boolean {
-  return (
-    latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180
-  );
-}
-
-function rowToProject(row: Record<string, string>, index: number): Project | null {
-  const name = findColumn(row, "Projektname", "Name");
-  const city = findColumn(row, "Ort", "Stadt", "City");
-  let latitude = toNumber(findColumn(row, "Latitude", "Lat", "Breitengrad"));
-  let longitude = toNumber(findColumn(row, "Longitude", "Lng", "Lon", "Längengrad"));
-
-  if (latitude != null && longitude != null && !isValidCoord(latitude, longitude)) {
-    console.warn(
-      `[useProjects] Zeile ${index + 2}: Latitude/Longitude außerhalb des gültigen Bereichs (${latitude}, ${longitude}) — vermutlich durch Zahlenformatierung in Google Sheets verfälscht (Spalten auf "Reiner Text" stellen). Werte werden ignoriert.`,
-    );
-    latitude = undefined;
-    longitude = undefined;
-  }
-
-  if (latitude == null || longitude == null) {
-    const mapsUrl = findColumn(
-      row,
-      "Google-Maps-Link",
-      "Google Maps Link",
-      "Maps-Link",
-      "Standort-Link",
-      "Google Maps",
-    );
-    const coords = mapsUrl ? extractLatLngFromGoogleMapsUrl(mapsUrl) : null;
-    if (coords) {
-      latitude = coords.latitude;
-      longitude = coords.longitude;
-    } else if (mapsUrl) {
-      console.warn(
-        `[useProjects] Zeile ${index + 2}: Koordinaten konnten nicht aus dem Google-Maps-Link gelesen werden — bitte die volle Adressleisten-URL statt eines "Teilen"-Kurzlinks (maps.app.goo.gl) verwenden.`,
-      );
-    }
-  }
-
-  if (!name || latitude == null || longitude == null) {
-    console.warn(
-      `[useProjects] Zeile ${index + 2} übersprungen — Projektname sowie gültige Latitude/Longitude oder ein gültiger Google-Maps-Link sind Pflichtfelder.`,
-    );
-    return null;
-  }
-
-  const id =
-    findColumn(row, "ID", "Id") ||
-    `${slugify(name)}-${slugify(city ?? "")}` ||
-    `projekt-${index}`;
-
-  return {
-    id,
-    name,
-    city: city ?? "",
-    country: findColumn(row, "Land", "Country") || "Deutschland",
-    latitude,
-    longitude,
-    courts: toNumber(findColumn(row, "Courts", "Anzahl Courts")),
-    courtType: findColumn(row, "Court-Typ", "Courttyp", "Court Typ"),
-    indoorOutdoor: findColumn(row, "Indoor/Outdoor", "Indoor-Outdoor", "IndoorOutdoor", "Indoor Outdoor"),
-    popUpTour: Boolean(
-      findColumn(row, "Pop-Up-Tour", "Pop-Up Tour", "PopUpTour", "AFP Pop-Up Tour", "Pop-Up"),
-    ),
-    live: Boolean(findColumn(row, "Live")),
-    pinnedPosition: (() => {
-      const n = toNumber(findColumn(row, "Position", "Highlight", "Reihenfolge", "Fixe Position"));
-      return n != null && n >= 1 && n <= 4 ? n : undefined;
-    })(),
-    completionYear: toNumber(findColumn(row, "Fertigstellungsjahr", "Jahr")),
-    description: findColumn(row, "Beschreibung", "Description"),
-    image: findColumn(row, "Bild-URL", "Bild", "Image"),
-    blogUrl: findColumn(row, "Blog-URL", "Blogurl", "Link"),
-    courtBrand: findColumn(row, "Marke", "Courtmarke", "Brand"),
-    courtBrandLogo: findColumn(row, "Marken-Logo-URL", "Markenlogo", "Brand Logo"),
-  };
-}
-
 /** Platzhalterdaten nur in der lokalen Entwicklung — auf der Live-Seite dürfen
- * die Dummy-Projekte nie erscheinen, dort bleibt die Liste ohne CSV leer. */
+ * die Dummy-Projekte nie erscheinen, dort bleibt die Liste ohne CRM-Daten leer. */
 const OFFLINE_PROJECTS: Project[] = import.meta.env.DEV ? fallbackProjects : [];
 
 /** Ein gemeinsamer Abruf für alle Komponenten (Karte, Liste, Legende) — die
- * CSV wird pro Seitenaufruf nur einmal geladen und alle zeigen denselben Stand. */
+ * Projekte werden pro Seitenaufruf nur einmal geladen und alle zeigen denselben Stand. */
 let sharedLoad: Promise<ProjectsState> | null = null;
 
 function loadProjects(): Promise<ProjectsState> {
-  sharedLoad ??= fetch(PROJECTS_CSV_URL)
+  sharedLoad ??= fetch(PROJECTS_API_URL)
     .then((res) => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.text();
+      return res.json() as Promise<unknown>;
     })
-    .then((text): ProjectsState => {
-      const parsed = parseCsv(text)
-        .map((row, index) => rowToProject(row, index))
-        .filter((project): project is Project => project !== null)
-        .filter((project) => project.live);
+    .then((payload): ProjectsState => {
+      const parsed = parseProjectsResponse(payload).filter((project) => project.live);
 
       if (parsed.length === 0) {
-        throw new Error("CSV enthielt keine gültigen Projektzeilen.");
+        throw new Error("Das CRM hat keine Live-Projekte geliefert.");
       }
 
-      return { projects: parsed, source: "csv", loading: false, error: null };
+      return { projects: parsed, source: "crm", loading: false, error: null };
     })
     .catch((err: unknown): ProjectsState => {
       const message = err instanceof Error ? err.message : String(err);
-      console.warn(`[useProjects] Projekt-CSV konnte nicht geladen werden (${message}).`);
+      console.warn(`[useProjects] Projekte konnten nicht aus dem CRM geladen werden (${message}).`);
       return { projects: OFFLINE_PROJECTS, source: "fallback", loading: false, error: message };
     });
   return sharedLoad;
 }
 
 /**
- * Lädt Projektdaten aus der in dataSource.ts konfigurierten CSV-Quelle.
- * Während des Ladens ist die Projektliste leer. Schlägt der Abruf/das Parsen
- * fehl, bleibt sie auf der Live-Seite leer und `error` ist gesetzt (die
- * Komponenten zeigen dann einen Hinweis); nur in der lokalen Entwicklung wird
- * auf die Platzhalterdaten (src/data/projects.ts) zurückgefallen.
+ * Lädt die Projektdaten aus dem CRM (siehe dataSource.ts). Während des Ladens
+ * ist die Projektliste leer. Schlägt der Abruf fehl, bleibt sie auf der
+ * Live-Seite leer und `error` ist gesetzt (die Komponenten zeigen dann einen
+ * Hinweis); nur in der lokalen Entwicklung wird auf die Platzhalterdaten
+ * (src/data/projects.ts) zurückgefallen.
  */
 export function useProjects(): ProjectsState {
   const [state, setState] = useState<ProjectsState>({
-    projects: PROJECTS_CSV_URL ? [] : OFFLINE_PROJECTS,
+    projects: [],
     source: "fallback",
-    loading: Boolean(PROJECTS_CSV_URL),
+    loading: true,
     error: null,
   });
 
   useEffect(() => {
-    if (!PROJECTS_CSV_URL) return;
-
     let cancelled = false;
 
     void loadProjects().then((next) => {
