@@ -46,11 +46,13 @@ Die Embeds starten immer mit der hellen Karte; die Hauptseite folgt der Systemei
 
 ## Projekte pflegen
 
-Die Projekte kommen aus einem Google Sheet, das die Seite bei jedem Aufruf als CSV lädt. Änderungen im Sheet sind sofort live, ein Deployment ist dafür nicht nötig. Die vollständige Anleitung mit allen Spaltennamen steht in [`src/config/dataSource.ts`](src/config/dataSource.ts).
+Die Projekte kommen aus dem SCC CRM. Gepflegt wird dort unter **Marketing → Projektkarte** (sichtbar mit der Berechtigung „Marketing", Admins immer). Die Karte lädt die Daten bei jedem Aufruf von der öffentlichen CRM-Schnittstelle; ein Deployment der Karte ist für Änderungen nicht nötig. Die Adresse der Schnittstelle steht in [`src/config/dataSource.ts`](src/config/dataSource.ts).
 
-- Nur Zeilen mit einem Wert in der Spalte „Live" werden angezeigt.
-- Die Zahl „Insgesamt … Courts gebaut" ist die Summe der Spalte „Courts" (Pop-Up-Tour eingerechnet). Fehlt dort der Wert, zählen ersatzweise die Stückzahlen aus „Court-Typ".
-- Lädt das Sheet nicht, zeigt die Live-Seite die Karte ohne Marker und einen Hinweis. Die Platzhalterdaten in [`src/data/projects.ts`](src/data/projects.ts) erscheinen nur in der lokalen Entwicklung.
+- Auf der Karte erscheinen nur Einträge mit dem Häkchen „Live auf der Karte". Live geht nur mit Koordinaten; das CRM übernimmt sie aus dem eingefügten Google-Maps-Link.
+- Änderungen im CRM sind nach etwa einer Minute sichtbar.
+- Die Zahl „Insgesamt … Courts gebaut" ist die Summe des Felds „Courts" (Pop-Up-Tour eingerechnet). Fehlt dort der Wert, zählen ersatzweise die Stückzahlen aus „Court-Typ".
+- Ist das CRM nicht erreichbar, zeigt die Live-Seite die Karte ohne Marker und einen Hinweis. Die Platzhalterdaten in [`src/data/projects.ts`](src/data/projects.ts) erscheinen nur in der lokalen Entwicklung.
+- Das frühere Google Sheet ist keine Datenquelle mehr; Änderungen dort haben keine Wirkung.
 
 ## Karte
 

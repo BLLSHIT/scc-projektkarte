@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { VECTOR_MAP_SIZE, projectLonLat } from "../src/config/mapProjection";
-import { parseCsv } from "../src/data/csv";
-import { extractLatLngFromGoogleMapsUrl } from "../src/data/googleMapsLink";
 import { parseProjectsResponse } from "../src/data/parseProjects";
 import { parseCourtBreakdown, resolveCourtCount } from "../src/utils/parseCourtBreakdown";
 
@@ -32,69 +30,6 @@ describe("projectLonLat", () => {
       expect(y).toBeGreaterThan(0);
       expect(y).toBeLessThan(VECTOR_MAP_SIZE.height);
     }
-  });
-});
-
-describe("parseCsv", () => {
-  it("liest Kopfzeile und Zeilen und entfernt Leerraum", () => {
-    expect(parseCsv("Projektname, Ort ,Courts\n Anlage A ,Berlin,4\n")).toEqual([
-      { Projektname: "Anlage A", Ort: "Berlin", Courts: "4" },
-    ]);
-  });
-
-  it("erkennt Semikolon als Trennzeichen", () => {
-    expect(parseCsv("Projektname;Ort\nAnlage A;Berlin")).toEqual([
-      { Projektname: "Anlage A", Ort: "Berlin" },
-    ]);
-  });
-
-  it("behält Trennzeichen, Zeilenumbrüche und escapte Anführungszeichen in Feldern", () => {
-    const csv = 'Projektname,Beschreibung\n"Anlage A, Nord","Zeile 1\nZeile 2 ""Zitat"""\n';
-    expect(parseCsv(csv)).toEqual([
-      { Projektname: "Anlage A, Nord", Beschreibung: 'Zeile 1\nZeile 2 "Zitat"' },
-    ]);
-  });
-
-  it("überspringt leere Zeilen und verarbeitet CRLF", () => {
-    expect(parseCsv("Projektname,Ort\r\nAnlage A,Berlin\r\n,\r\nAnlage B,Köln\r\n")).toEqual([
-      { Projektname: "Anlage A", Ort: "Berlin" },
-      { Projektname: "Anlage B", Ort: "Köln" },
-    ]);
-  });
-
-  it("füllt fehlende Zellen mit leerem Text", () => {
-    expect(parseCsv("Projektname,Ort,Courts\nAnlage A")).toEqual([
-      { Projektname: "Anlage A", Ort: "", Courts: "" },
-    ]);
-  });
-
-  it("liefert für leeren Text keine Zeilen", () => {
-    expect(parseCsv("")).toEqual([]);
-  });
-});
-
-describe("extractLatLngFromGoogleMapsUrl", () => {
-  it("bevorzugt die Pin-Position (!3d/!4d) vor dem Kartenausschnitt (@)", () => {
-    const url =
-      "https://www.google.com/maps/place/Ort/@50.1,8.1,10z/data=!3m1!4b1!4m6!3d51.1657!4d10.4515";
-    expect(extractLatLngFromGoogleMapsUrl(url)).toEqual({ latitude: 51.1657, longitude: 10.4515 });
-  });
-
-  it("liest Koordinaten aus dem @-Muster", () => {
-    expect(
-      extractLatLngFromGoogleMapsUrl("https://www.google.com/maps/@51.1657,10.4515,17z"),
-    ).toEqual({ latitude: 51.1657, longitude: 10.4515 });
-  });
-
-  it("liest Koordinaten aus dem q-Parameter, auch negative", () => {
-    expect(extractLatLngFromGoogleMapsUrl("https://maps.google.com/?q=-33.8688,-70.6693")).toEqual({
-      latitude: -33.8688,
-      longitude: -70.6693,
-    });
-  });
-
-  it("liefert null für Kurzlinks ohne Koordinaten", () => {
-    expect(extractLatLngFromGoogleMapsUrl("https://maps.app.goo.gl/AbCdEf123")).toBeNull();
   });
 });
 
