@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { VECTOR_MAP_SIZE, projectLonLat } from "../src/config/mapProjection";
 import { parseProjectsResponse } from "../src/data/parseProjects";
-import { parseCourtBreakdown, resolveCourtCount } from "../src/utils/parseCourtBreakdown";
+import { formatCourtExtras, parseCourtBreakdown, resolveCourtCount } from "../src/utils/parseCourtBreakdown";
 
 describe("projectLonLat", () => {
   it("legt Mittelmeridian und Mittelbreite in die Bildmitte", () => {
@@ -47,6 +47,16 @@ describe("parseCourtBreakdown", () => {
       { label: "adidas PANOARENA 180°" },
       { label: "AFP" },
     ]);
+  });
+
+  it("ordnet Extras in Klammern dem Modell zu", () => {
+    const items = parseCourtBreakdown("7 adidas PANOARENA AFP (2 Base + Try & Buy System); 3 adidas PILLARFORCE FX");
+    expect(items).toEqual([
+      { count: 7, label: "adidas PANOARENA AFP", extras: [{ count: 2, label: "Base" }, { label: "Try & Buy System" }] },
+      { count: 3, label: "adidas PILLARFORCE FX" },
+    ]);
+    expect(formatCourtExtras(items[0])).toBe(" + 2× Base, Try & Buy System");
+    expect(formatCourtExtras(items[1])).toBe("");
   });
 
   it("liefert für fehlende Angaben eine leere Liste", () => {

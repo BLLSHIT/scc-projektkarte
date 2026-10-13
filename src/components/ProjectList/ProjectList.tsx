@@ -4,7 +4,7 @@ import type { Project } from "../../data/projects";
 import { BrandBadge } from "../BrandBadge/BrandBadge";
 import { resolveBrandDisplay } from "../BrandBadge/resolveBrand";
 import { splitTags } from "../../utils/splitTags";
-import { parseCourtBreakdown } from "../../utils/parseCourtBreakdown";
+import { formatCourtExtras, parseCourtBreakdown } from "../../utils/parseCourtBreakdown";
 import styles from "./ProjectList.module.css";
 
 const ALL = "__all__";
@@ -261,6 +261,7 @@ export function ProjectList({ fullWidth = false }: { fullWidth?: boolean } = {})
                           <span className={styles.courtCount}>{item.count}×</span>
                         ) : null}
                         {item.label}
+                        {formatCourtExtras(item)}
                       </li>
                     ))}
                   </ul>

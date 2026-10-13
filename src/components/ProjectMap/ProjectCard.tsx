@@ -3,7 +3,7 @@ import type { Project } from "../../data/projects";
 import { BrandBadge } from "../BrandBadge/BrandBadge";
 import { resolveBrandDisplay } from "../BrandBadge/resolveBrand";
 import { splitTags } from "../../utils/splitTags";
-import { parseCourtBreakdown } from "../../utils/parseCourtBreakdown";
+import { formatCourtExtras, parseCourtBreakdown } from "../../utils/parseCourtBreakdown";
 import styles from "./ProjectCard.module.css";
 
 type Point = { x: number; y: number };
@@ -201,7 +201,7 @@ export function ProjectCard({
           {visibleTypes.map((item, i) => (
             <li key={`${item.label}-${i}`}>
               {item.count != null ? <span className={styles.courtCount}>{item.count}×</span> : null}
-              <span className={styles.courtLabel}>{item.label}</span>
+              <span className={styles.courtLabel}>{item.label}{formatCourtExtras(item)}</span>
             </li>
           ))}
           {hiddenTypeCount > 0 ? (
